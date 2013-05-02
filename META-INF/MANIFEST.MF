@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: MCP Unofficial Plugin
+Bundle-SymbolicName: org.lo.d.eclipse-plugin.mcp; singleton:=true
+Bundle-Version: 0.0.1
+Bundle-Activator: mcp_plugin.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.ui.ide,
+ org.eclipse.core.resources
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
