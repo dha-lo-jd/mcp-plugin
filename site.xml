@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <category-def name="mcp_plugin" label="MCP Plugin"/>
+   <feature url="features/org.lo.d.eclipse_plugin.mcp.feature_0.0.1.jar" id="org.lo.d.eclipse_plugin.mcp.feature" version="0.0.1">
+      <category name="org.lo.d.eclipse_plugin.mcp"/>
+   </feature>
+   <category-def name="org.lo.d.eclipse_plugin.mcp" label="MCP Plugin"/>
 </site>
