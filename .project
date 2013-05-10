@@ -3,6 +3,8 @@
 	<name>mcp-plugin</name>
 	<comment></comment>
 	<projects>
+		<project>mcp-plugin.feature</project>
+		<project>mcp-plugin.site</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -25,4 +27,11 @@
 		<nature>org.eclipse.pde.PluginNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>bin</name>
+			<type>2</type>
+			<location>V:/eclipse_temp/bin/mcp-plugin/bin</location>
+		</link>
+	</linkedResources>
 </projectDescription>

@@ -3,127 +3,176 @@
 <plugin>
 
    <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            name="MCPビルド"
+            class="org.lo.d.eclipseplugin.mcp.view.MCPPropertyPage"
+            id="org.lo.d.eclipseplugin.mcp.properties.samplePropertyPage">
+         <enabledWhen>
+         <adapt
+               type="org.eclipse.core.resources.IProject">
+               <test
+                     property="org.eclipse.core.resources.open"/>
+         </adapt>
+         </enabledWhen>
+      </page>
+   </extension>
+   <extension
          point="org.eclipse.ui.commands">
       <category
-            name="サンプル・カテゴリー"
-            id="org.lo.d.eclipse-plugin.mcp.commands.category">
+            id="org.lo.d.eclipse-plugin.mcp.commands.category"
+            name="MCP">
       </category>
       <command
-            name="サンプル・コマンド"
             categoryId="org.lo.d.eclipse-plugin.mcp.commands.category"
-            id="org.lo.d.eclipse-plugin.mcp.commands.sampleCommand">
+            id="org.lo.d.eclipse-plugin.mcp.commands.AllCommand"
+            name="MD5更新+難読化+ZIP圧縮">
+      </command>
+      <command
+            categoryId="org.lo.d.eclipse-plugin.mcp.commands.category"
+            id="org.lo.d.eclipse-plugin.mcp.commands.UpdateMD5AndReobfucateCommand"
+            name="MD5更新+難読化">
+      </command>
+      <command
+            categoryId="org.lo.d.eclipse-plugin.mcp.commands.category"
+            id="org.lo.d.eclipse-plugin.mcp.commands.ReobfAndCompressCommand"
+            name="難読化+ZIP圧縮">
+      </command>
+      <command
+            categoryId="org.lo.d.eclipse-plugin.mcp.commands.category"
+            id="org.lo.d.eclipse-plugin.mcp.commands.CompressOnlyCommand"
+            name="ZIP圧縮">
+      </command>
+      <command
+            categoryId="org.lo.d.eclipse-plugin.mcp.commands.category"
+            id="org.lo.d.eclipse-plugin.mcp.commands.ReobfOnlyCommand"
+            name="難読化">
       </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            commandId="org.lo.d.eclipse-plugin.mcp.commands.sampleCommand"
-            class="org.lo.d.eclipseplugin.mcp.handlers.SampleHandler">
+            class="org.lo.d.eclipseplugin.mcp.handlers.AllCommandHandler"
+            commandId="org.lo.d.eclipse-plugin.mcp.commands.AllCommand">
+            <activeWhen>
+            <reference
+                  definitionId="org.lo.d.eclipse-plugin.mcp.condition.isOpenProjectOne">
+            </reference>
+            </activeWhen>
       </handler>
-   </extension>
-   <extension
-         point="org.eclipse.ui.bindings">
-      <key
-            commandId="org.lo.d.eclipse-plugin.mcp.commands.sampleCommand"
-            contextId="org.eclipse.ui.contexts.window"
-            sequence="M1+6"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
-      </key>
+      <handler
+            class="org.lo.d.eclipseplugin.mcp.handlers.UpdateMD5AndReobfucateCommandHandler"
+            commandId="org.lo.d.eclipse-plugin.mcp.commands.UpdateMD5AndReobfucateCommand">
+            <activeWhen>
+            <reference
+                  definitionId="org.lo.d.eclipse-plugin.mcp.condition.isOpenProjectOne">
+            </reference>
+            </activeWhen>
+      </handler>
+      <handler
+            class="org.lo.d.eclipseplugin.mcp.handlers.ReobfAndCompressCommandHandler"
+            commandId="org.lo.d.eclipse-plugin.mcp.commands.ReobfAndCompressCommand">
+            <activeWhen>
+            <reference
+                  definitionId="org.lo.d.eclipse-plugin.mcp.condition.isOpenProjectOne">
+            </reference>
+            </activeWhen>
+      </handler>
+      <handler
+            class="org.lo.d.eclipseplugin.mcp.handlers.CompressOnlyCommandHandler"
+            commandId="org.lo.d.eclipse-plugin.mcp.commands.CompressOnlyCommand">
+            <activeWhen>
+            <reference
+                  definitionId="org.lo.d.eclipse-plugin.mcp.condition.isOpenProjectOne">
+            </reference>
+            </activeWhen>
+      </handler>
+      <handler
+            class="org.lo.d.eclipseplugin.mcp.handlers.ReobfOnlyCommandHandler"
+            commandId="org.lo.d.eclipse-plugin.mcp.commands.ReobfOnlyCommand">
+            <activeWhen>
+            <reference
+                  definitionId="org.lo.d.eclipse-plugin.mcp.condition.isOpenProjectOne">
+            </reference>
+            </activeWhen>
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution
-            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
          <menu
-               label="サンプル・メニュー"
-               mnemonic="M"
-               id="org.lo.d.eclipse-plugin.mcp.menus.sampleMenu">
+               id="org.lo.d.eclipse-plugin.mcp.menus.sampleMenu"
+               label="MCPビルド"
+               mnemonic="M">
+            <visibleWhen
+                  checkEnabled="true">
+               <reference
+                     definitionId="org.lo.d.eclipse-plugin.mcp.condition.isProject">
+               </reference>
+            </visibleWhen>
             <command
-                  commandId="org.lo.d.eclipse-plugin.mcp.commands.sampleCommand"
-                  mnemonic="S"
-                  id="org.lo.d.eclipse-plugin.mcp.menus.sampleCommand">
+                  commandId="org.lo.d.eclipse-plugin.mcp.commands.AllCommand"
+                  id="org.lo.d.eclipse-plugin.mcp.menus.AllCommand"
+                  mnemonic="S">
             </command>
-         </menu>
-      </menuContribution>
-      <menuContribution
-            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
-         <toolbar
-               id="org.lo.d.eclipse-plugin.mcp.toolbars.sampleToolbar">
             <command
-                  commandId="org.lo.d.eclipse-plugin.mcp.commands.sampleCommand"
-                  icon="icons/sample.gif"
-                  tooltip="Say hello world"
-                  id="org.lo.d.eclipse-plugin.mcp.toolbars.sampleCommand">
+                  commandId="org.lo.d.eclipse-plugin.mcp.commands.ReobfAndCompressCommand"
+                  id="org.lo.d.eclipse-plugin.mcp.menus.ReobfAndCompressCommand"
+                  mnemonic="S">
             </command>
-         </toolbar>
-      </menuContribution>
-   </extension>
-   <extension
-         point="org.eclipse.ui.importWizards">
-      <category
-            name="サンプル・ファイルのインポート"
-            id="org.lo.d.eclipseplugin.mcp.importWizards.sampleCategory">
-      </category>
-      <wizard
-            name="ファイルのインポート"
-            icon="icons/sample.gif"
-            category="org.lo.d.eclipseplugin.mcp.importWizards.sampleCategory"
-            class="org.lo.d.eclipseplugin.mcp.importWizards.ImportWizard"
-            id="org.lo.d.eclipseplugin.mcp.importWizards.ImportWizard">
-         <description>
-            ローカル・ファイル・システムからワークスペースにファイルをインポートします。
-         </description>
-      </wizard>
-   </extension>
-   <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            objectClass="org.eclipse.core.resources.IFile"
-            id="org.lo.d.eclipse-plugin.mcp.contribution1">
-         <menu
-               label="新規サブメニュー"
-               path="additions"
-               id="org.lo.d.eclipse-plugin.mcp.menu1">
             <separator
-                  name="group1">
+                  name="mcp-plugin.separator1">
             </separator>
+            <command
+                  commandId="org.lo.d.eclipse-plugin.mcp.commands.UpdateMD5AndReobfucateCommand"
+                  id="org.lo.d.eclipse-plugin.mcp.menus.UpdateMD5AndReobfucateCommand"
+                  mnemonic="S">
+            </command>
+            <command
+                  commandId="org.lo.d.eclipse-plugin.mcp.commands.CompressOnlyCommand"
+                  id="org.lo.d.eclipse-plugin.mcp.menus.CompressOnlyCommand"
+                  mnemonic="S">
+            </command>
+            <command
+                  commandId="org.lo.d.eclipse-plugin.mcp.commands.ReobfOnlyCommand"
+                  id="org.lo.d.eclipse-plugin.mcp.menus.ReobfOnlyCommand"
+                  mnemonic="S">
+            </command>
          </menu>
-         <action
-               label="新規アクション"
-               class="org.lo.d.eclipseplugin.mcp.popup.actions.新規アクション"
-               menubarPath="org.lo.d.eclipse-plugin.mcp.menu1/group1"
-               enablesFor="1"
-               id="org.lo.d.eclipse-plugin.mcp.newAction">
-         </action>
-      </objectContribution>
+      </menuContribution>
+   </extension>
+
+   <extension
+         point="org.eclipse.core.expressions.definitions">
+      <definition
+            id="org.lo.d.eclipse-plugin.mcp.condition.isOpenProjectOne">
+                  <with
+                        variable="selection">
+                        <count value="1" />
+                       <iterate ifEmpty="false">
+                         <adapt
+                               type="org.eclipse.core.resources.IProject">
+                               <test
+                                     property="org.eclipse.core.resources.open"/>
+                         </adapt>
+                       </iterate>
+                  </with>
+      </definition>
    </extension>
    <extension
-         point="org.eclipse.ui.preferencePages">
-      <page
-            name="サンプル設定"
-            class="org.lo.d.eclipseplugin.mcp.preferences.SamplePreferencePage"
-            id="org.lo.d.eclipseplugin.mcp.preferences.SamplePreferencePage">
-      </page>
-   </extension>
-   <extension
-         point="org.eclipse.core.runtime.preferences">
-      <initializer
-            class="org.lo.d.eclipseplugin.mcp.preferences.PreferenceInitializer">
-      </initializer>
-   </extension>
-   <extension
-         point="org.eclipse.ui.propertyPages">
-      <page
-            name="サンプル・ページ"
-            nameFilter="*.*"
-            class="org.lo.d.eclipseplugin.mcp.properties.SamplePropertyPage"
-            id="org.lo.d.eclipseplugin.mcp.properties.samplePropertyPage">
-         <enabledWhen>
-            <instanceof
-                  value="org.eclipse.core.resources.IFile">
-            </instanceof>
-         </enabledWhen>
-      </page>
+         point="org.eclipse.core.expressions.definitions">
+      <definition
+            id="org.lo.d.eclipse-plugin.mcp.condition.isProject">
+                  <with
+                        variable="selection">
+                       <iterate ifEmpty="false">
+                         <adapt
+                               type="org.eclipse.core.resources.IProject">
+                         </adapt>
+                       </iterate>
+                  </with>
+      </definition>
    </extension>
 
 </plugin>
