@@ -3,10 +3,11 @@ package org.lo.d.eclipseplugin.mcp.view;
 import mcp_plugin.Activator;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -64,30 +65,22 @@ public class MCPPropertyPage extends PropertyPage {
 				CTabItem tabItemMcpSettings = new CTabItem(tabFolder, SWT.NONE);
 				tabItemMcpSettings.setText("MCPロケーション");
 
-				tabItemMcpSettings.setControl(new MCPLocationView(tabFolder,
-						SWT.NONE, (IProject) getElement(), propertyModel
-								.getMcpLocation(), propertyModel
-								.getGenerateTempBuildLocation()));
+				tabItemMcpSettings.setControl(new MCPLocationView(tabFolder, SWT.NONE, getProject(), propertyModel.getMcpLocation(), propertyModel
+						.getGenerateTempBuildLocation()));
 
 				tabFolder.setSelection(tabItemMcpSettings);
 			}
 
 			{
-				CTabItem tabItemDependencySrcSettings = new CTabItem(tabFolder,
-						SWT.NONE);
+				CTabItem tabItemDependencySrcSettings = new CTabItem(tabFolder, SWT.NONE);
 				tabItemDependencySrcSettings.setText("依存ソース・ロケーション");
-				tabItemDependencySrcSettings
-						.setControl(new SourceLocationTreeView(tabFolder,
-								SWT.NONE, workspaceNode, propertyModel
-										.getDependencySrcLocations()));
+				tabItemDependencySrcSettings.setControl(new SourceLocationTreeView(tabFolder, SWT.NONE, workspaceNode, propertyModel
+						.getDependencySrcLocations()));
 			}
 			{
-				CTabItem tabItemTargetSrcSettings = new CTabItem(tabFolder,
-						SWT.NONE);
+				CTabItem tabItemTargetSrcSettings = new CTabItem(tabFolder, SWT.NONE);
 				tabItemTargetSrcSettings.setText("対象ソース・ロケーション");
-				tabItemTargetSrcSettings.setControl(new SourceLocationTreeView(
-						tabFolder, SWT.NONE, workspaceNode, propertyModel
-								.getTargetSrcLocations()));
+				tabItemTargetSrcSettings.setControl(new SourceLocationTreeView(tabFolder, SWT.NONE, workspaceNode, propertyModel.getTargetSrcLocations()));
 			}
 		}
 
@@ -116,9 +109,20 @@ public class MCPPropertyPage extends PropertyPage {
 		return composite;
 	}
 
+	private IProject getProject() {
+		IAdaptable o = getElement();
+		if (o instanceof IJavaProject) {
+			return ((IJavaProject) o).getProject();
+		} else if (o instanceof IProject) {
+			return ((IProject) o).getProject();
+		} else {
+			throw new IllegalArgumentException(getElement().toString());
+		}
+	}
+
 	private void initModel(WorkspaceNode workspaceNode) {
 		propertyModel = new MCPPropertyModel(Activator.PLUGIN_ID, workspaceNode);
-		propertyModel.setResource((IResource) getElement());
+		propertyModel.setResource(getProject());
 		propertyModel.load();
 	}
 
