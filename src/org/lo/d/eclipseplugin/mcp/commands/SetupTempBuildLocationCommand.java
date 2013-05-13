@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.lo.d.eclipseplugin.mcp.commands.BuildCommand.AbstractBuildCommand;
 import org.lo.d.eclipseplugin.mcp.handlers.MCPBuildProperty;
 import org.lo.d.eclipseplugin.mcp.handlers.NestMessageConsole;
@@ -18,8 +19,18 @@ public class SetupTempBuildLocationCommand extends AbstractBuildCommand {
 	}
 
 	@Override
+	public int getCommandCount() {
+		return printMessageCommand.getCommandCount() + 1;
+	}
+
+	@Override
 	protected void runCommand() throws ExecutionException {
-		printMessageCommand.run();
+		SubProgressMonitor subMonitor;
+		subMonitor = new SubProgressMonitor(monitor, 50);
+		printMessageCommand.run(subMonitor);
+		subMonitor.done();
+		subMonitor = new SubProgressMonitor(monitor, 50);
+		subMonitor.beginTask(name, 100);
 		File mcpDir = property.getMcpLocation();
 
 		if (!mcpDir.exists()) {
@@ -30,16 +41,21 @@ public class SetupTempBuildLocationCommand extends AbstractBuildCommand {
 		Path rootPath = Paths.get(root.toURI());
 		Path srcPath = rootPath.resolve("src/minecraft");
 
+		subMonitor.subTask("Gen dirs.");
 		out.println("Gen dirs.");
 		out.nest();
 		createDirectory(rootPath);
 		createDirectory(srcPath);
 		out.endNest();
+		subMonitor.worked(50);
 
+		subMonitor.subTask("Gen links.");
 		out.println("Gen links.");
 		out.nest();
 		generateLinks(mcpDir, rootPath);
 		out.endNest();
+		subMonitor.worked(50);
+		subMonitor.done();
 	}
 
 }

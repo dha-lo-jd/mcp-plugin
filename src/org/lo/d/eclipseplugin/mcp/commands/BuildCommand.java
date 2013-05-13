@@ -11,15 +11,39 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.lo.d.eclipseplugin.mcp.handlers.MCPBuildProperty;
 import org.lo.d.eclipseplugin.mcp.handlers.NestMessageConsole;
 
 public interface BuildCommand {
 	public abstract class AbstractBuildCommand implements BuildCommand {
+		private static class FilesCount {
+			int files = 0;
+			int dirs = 0;
+
+			public FilesCount() {
+			}
+
+			public FilesCount(File file) {
+				if (file.isDirectory()) {
+					files = 1;
+				} else {
+					dirs = 1;
+				}
+			}
+
+			private FilesCount add(FilesCount count) {
+				files = files + count.files;
+				dirs = dirs + count.dirs;
+				return this;
+			}
+		}
+
 		protected static final String[] EXCLUDE_FOLDERS = {
 				"bin", "docs", "eclipse", "logs", "reobf", "src",
 		};
 		protected static final Pattern PATTERN_EXCLUDE_FOLDER;
+
 		static {
 			StringBuilder sb = new StringBuilder();
 			String sep = "";
@@ -44,9 +68,12 @@ public interface BuildCommand {
 		}
 
 		protected final MCPBuildProperty property;
+
 		protected final NestMessageConsole out;
 
 		protected final String name;
+
+		protected IProgressMonitor monitor;
 
 		protected AbstractBuildCommand(MCPBuildProperty property, NestMessageConsole out, String name) {
 			this.property = property;
@@ -55,9 +82,17 @@ public interface BuildCommand {
 		}
 
 		@Override
-		public void run() throws ExecutionException {
+		public int getCommandCount() {
+			return 1;
+		}
+
+		@Override
+		public void run(IProgressMonitor monitor) throws ExecutionException {
+			this.monitor = monitor;
+			monitor.beginTask(name, 100);
 			out.nest();
 			out.println("Start process: " + name);
+			monitor.setTaskName(name);
 			runCommand();
 			out.println("End process: " + name);
 			out.endNest();
@@ -88,9 +123,12 @@ public interface BuildCommand {
 				return;
 			}
 
+			FilesCount fileCounts = new FilesCount();
 			for (File file : rootFile.listFiles()) {
-				deleteDirectoryAndFiles(file);
+				fileCounts.add(deleteDirectoryAndFiles(file));
 			}
+
+			out.println(String.format("Cleaned %s. dirs:%d, files:%d.", path, fileCounts.dirs, fileCounts.files));
 		}
 
 		protected void createDirectory(Path path) throws ExecutionException {
@@ -117,23 +155,24 @@ public interface BuildCommand {
 			}
 		}
 
-		protected void deleteDirectoryAndFiles(File file) {
+		protected FilesCount deleteDirectoryAndFiles(File file) {
 			if (!file.exists()) {
-				return;
+				return new FilesCount();
 			}
+			FilesCount fileCounts = new FilesCount(file);
 			if (file.isDirectory()) {
 				for (File f : file.listFiles()) {
-					deleteDirectoryAndFiles(f);
+					fileCounts.add(deleteDirectoryAndFiles(f));
 				}
 			}
 			file.delete();
+			return fileCounts;
 		}
 
 		protected void generateLinks(File mcpDir, Path rootPath) throws ExecutionException {
 			File[] files = mcpDir.listFiles(new FileFilter() {
 				@Override
 				public boolean accept(File pathname) {
-					System.out.println(pathname.getAbsolutePath());
 					if (pathname.isDirectory()) {
 						Matcher matcher = PATTERN_EXCLUDE_FOLDER.matcher(pathname.getName());
 						if (matcher.matches()) {
@@ -148,10 +187,7 @@ public interface BuildCommand {
 					return true;
 				}
 			});
-			System.out.println();
 			for (File file : files) {
-				System.out.println(file.getAbsolutePath());
-
 				Path entityPath = Paths.get(file.toURI());
 				Path linkPath = rootPath.resolve(entityPath.getFileName());
 				createLink(linkPath, entityPath);
@@ -161,5 +197,7 @@ public interface BuildCommand {
 		protected abstract void runCommand() throws ExecutionException;
 	}
 
-	public void run() throws ExecutionException;
+	public int getCommandCount();
+
+	public void run(IProgressMonitor monitor) throws ExecutionException;
 }

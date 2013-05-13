@@ -5,9 +5,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.lo.d.eclipseplugin.mcp.commands.BuildCommand.AbstractBuildCommand;
 import org.lo.d.eclipseplugin.mcp.handlers.MCPBuildProperty;
-import org.lo.d.eclipseplugin.mcp.handlers.MCPCommandSupport;
 import org.lo.d.eclipseplugin.mcp.handlers.NestMessageConsole;
 import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.SourceNode;
 
@@ -22,6 +22,7 @@ public class ReobfucateCommand extends AbstractBuildCommand {
 		Path rootPath = Paths.get(root.toURI());
 		Path srcPath = rootPath.resolve("src/minecraft");
 
+		monitor.setTaskName("Copy src.");
 		out.println("Copy src.");
 		out.nest();
 		{
@@ -30,20 +31,33 @@ public class ReobfucateCommand extends AbstractBuildCommand {
 				if (!f.isDirectory()) {
 					continue;
 				}
-				for (File file : f.listFiles()) {
+				File[] listFiles = f.listFiles();
+				SubProgressMonitor fMon;
+				fMon = new SubProgressMonitor(monitor, 20);
+				fMon.beginTask("Copy src.", listFiles.length);
+				for (File file : listFiles) {
 					Path entityPath = Paths.get(file.toURI());
 					Path linkPath = srcPath.resolve(entityPath.getFileName());
 
+					fMon.subTask(linkPath.toString());
 					copyFile(linkPath, entityPath);
+					fMon.worked(1);
 				}
+				fMon.done();
 			}
 		}
 		out.endNest();
+		monitor.worked(20);
 
-		MCPCommandSupport.recompile(root, out);
+		MCPCommandSupport.recompile(root, out, monitor);
+		monitor.worked(20);
 		Path reobfPath = rootPath.resolve("reobf");
 		deleteDirectoryAndFiles(reobfPath.toFile());
 		createDirectory(reobfPath);
-		MCPCommandSupport.reobfuscate(root, out);
+		monitor.worked(20);
+		MCPCommandSupport.reobfuscate(root, out, monitor);
+		monitor.worked(20);
+
+		monitor.done();
 	}
 }

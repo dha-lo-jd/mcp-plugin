@@ -5,9 +5,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.lo.d.eclipseplugin.mcp.commands.BuildCommand.AbstractBuildCommand;
 import org.lo.d.eclipseplugin.mcp.handlers.MCPBuildProperty;
-import org.lo.d.eclipseplugin.mcp.handlers.MCPCommandSupport;
 import org.lo.d.eclipseplugin.mcp.handlers.NestMessageConsole;
 import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.SourceNode;
 
@@ -20,16 +20,29 @@ public class UpdateMD5Command extends AbstractBuildCommand {
 	}
 
 	@Override
+	public int getCommandCount() {
+		return setupTempBuildLocationCommand.getCommandCount() + 1;
+	}
+
+	@Override
 	protected void runCommand() throws ExecutionException {
-		setupTempBuildLocationCommand.run();
+		{
+			SubProgressMonitor subMonitor;
+			subMonitor = new SubProgressMonitor(monitor, 10);
+			setupTempBuildLocationCommand.run(subMonitor);
+			subMonitor.done();
+		}
 
 		final File root = property.getGenerateTempBuildLocation();
 		Path rootPath = Paths.get(root.toURI());
 		Path srcPath = rootPath.resolve("src/minecraft");
 
+		monitor.setTaskName("Cleanup src.");
 		out.println("Cleanup src.");
 		creanDirectory(srcPath);
+		monitor.worked(30);
 
+		monitor.setTaskName("Copy src.");
 		out.println("Copy src.");
 		out.nest();
 		{
@@ -38,16 +51,27 @@ public class UpdateMD5Command extends AbstractBuildCommand {
 				if (!f.isDirectory()) {
 					continue;
 				}
-				for (File file : f.listFiles()) {
+				File[] listFiles = f.listFiles();
+				SubProgressMonitor fMon;
+				fMon = new SubProgressMonitor(monitor, 30);
+				fMon.beginTask("Copy src.", listFiles.length);
+				for (File file : listFiles) {
 					Path entityPath = Paths.get(file.toURI());
 					Path linkPath = srcPath.resolve(entityPath.getFileName());
 
+					fMon.subTask(linkPath.toString());
 					copyFile(linkPath, entityPath);
+					fMon.worked(1);
 				}
+				fMon.done();
 			}
 		}
 		out.endNest();
 
-		MCPCommandSupport.updatemd5(root, out);
+		monitor.setTaskName(name);
+		MCPCommandSupport.updatemd5(root, out, monitor);
+		monitor.worked(30);
+
+		monitor.done();
 	}
 }

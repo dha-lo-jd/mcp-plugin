@@ -1,12 +1,16 @@
 package org.lo.d.eclipseplugin.mcp.handlers;
 
+import java.io.PrintStream;
+
 import org.eclipse.ui.console.MessageConsoleStream;
 
-public class NestMessageConsole {
+public class NestMessageConsole extends PrintStream {
 	private final MessageConsoleStream out;
+
 	private int level = 0;
 
 	public NestMessageConsole(MessageConsoleStream out) {
+		super(out);
 		this.out = out;
 	}
 
@@ -32,14 +36,17 @@ public class NestMessageConsole {
 		level++;
 	}
 
+	@Override
 	public void print(String message) {
 		out.print(message);
 	}
 
+	@Override
 	public void println() {
 		out.println();
 	}
 
+	@Override
 	public void println(String message) {
 		indent();
 		out.println(message);

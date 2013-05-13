@@ -11,8 +11,7 @@ import java.util.Set;
 
 public abstract class AbstractPropertyListenerModel {
 
-	public interface ListenerCollectionProperty<T> extends ListenerProperty<T>,
-			Iterable<T> {
+	public interface ListenerCollectionProperty<T> extends ListenerProperty<T>, Iterable<T> {
 		public void clear();
 	}
 
@@ -28,8 +27,7 @@ public abstract class AbstractPropertyListenerModel {
 		public void remove(T value);
 	}
 
-	protected static abstract class AbstractListenerProperty<T> implements
-			ListenerProperty<T> {
+	protected static abstract class AbstractListenerProperty<T> implements ListenerProperty<T> {
 
 		public class Receiver implements ValueReceiver<T> {
 			@Override
@@ -89,8 +87,7 @@ public abstract class AbstractPropertyListenerModel {
 		}
 	}
 
-	protected static class ListenerCollectionPropertyImpl<T, CL extends Collection<T>>
-			extends AbstractListenerProperty<T> implements
+	protected static class ListenerCollectionPropertyImpl<T, CL extends Collection<T>> extends AbstractListenerProperty<T> implements
 			ListenerCollectionProperty<T> {
 		protected final CL values;
 
@@ -130,8 +127,7 @@ public abstract class AbstractPropertyListenerModel {
 
 	}
 
-	protected static class ListenerPropertyImpl<T> extends
-			AbstractListenerProperty<T> {
+	protected static class ListenerPropertyImpl<T> extends AbstractListenerProperty<T> {
 		private T value;
 
 		protected ListenerPropertyImpl() {
@@ -152,18 +148,18 @@ public abstract class AbstractPropertyListenerModel {
 
 		@Override
 		protected void initializeReceiver(ValueReceiver<T> receiver) {
+			if (value == null) {
+				return;
+			}
 			receiver.add(value);
 		}
 
 	}
 
-	protected <T extends ListenerProperty> Set<Field> getField(Class<T> type,
-			Class<?> modelClass) {
+	protected <T extends ListenerProperty> Set<Field> getField(Class<T> type, Class<?> modelClass) {
 		Set<Field> fields = new HashSet<Field>();
 		Class<?> superClass = modelClass.getSuperclass();
-		if (superClass != null
-				&& AbstractPropertyListenerModel.class
-						.isAssignableFrom(superClass)) {
+		if (superClass != null && AbstractPropertyListenerModel.class.isAssignableFrom(superClass)) {
 			fields.addAll(getField(type, superClass));
 		}
 
@@ -177,8 +173,7 @@ public abstract class AbstractPropertyListenerModel {
 		return fields;
 	}
 
-	protected <T extends ListenerProperty> Iterable<T> getProperties(
-			AbstractPropertyListenerModel model, Set<Field> fields) {
+	protected <T extends ListenerProperty> Iterable<T> getProperties(AbstractPropertyListenerModel model, Set<Field> fields) {
 		Set<T> result = new HashSet<T>();
 		for (Field f : fields) {
 			try {

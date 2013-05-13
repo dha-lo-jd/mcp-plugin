@@ -1,6 +1,8 @@
 package org.lo.d.eclipseplugin.mcp.handlers;
 
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.lo.d.eclipseplugin.mcp.commands.BuildCommand;
 import org.lo.d.eclipseplugin.mcp.commands.ReobfucateCommand;
 import org.lo.d.eclipseplugin.mcp.commands.UpdateMD5Command;
@@ -19,15 +21,19 @@ public class UpdateMD5AndReobfucateCommandHandler extends AbstractMCPCommandHand
 	}
 
 	@Override
-	protected void command(NestMessageConsole out) throws ExecutionException {
+	protected void command(NestMessageConsole out, IProgressMonitor monitor) throws ExecutionException {
+		monitor.beginTask("", 200);
 		{
+			IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 100);
 			BuildCommand command = new UpdateMD5Command(this, out);
-			command.run();
+			command.run(subMonitor);
+			subMonitor.done();
 		}
 		{
+			IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 100);
 			BuildCommand command = new ReobfucateCommand(this, out);
-			command.run();
+			command.run(subMonitor);
+			subMonitor.done();
 		}
 	}
-
 }

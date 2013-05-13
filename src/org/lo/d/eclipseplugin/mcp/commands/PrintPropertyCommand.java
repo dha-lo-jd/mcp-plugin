@@ -7,7 +7,8 @@ import org.lo.d.eclipseplugin.mcp.handlers.NestMessageConsole;
 import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.SourceNode;
 
 public class PrintPropertyCommand extends AbstractBuildCommand {
-	public PrintPropertyCommand(MCPBuildProperty property, NestMessageConsole out) {
+
+	protected PrintPropertyCommand(MCPBuildProperty property, NestMessageConsole out) {
 		super(property, out, "PrintProperty");
 	}
 
@@ -50,5 +51,8 @@ public class PrintPropertyCommand extends AbstractBuildCommand {
 
 		out.println("McpLocation Path: " + property.getMcpLocation());
 		out.println("GenerateTempBuildLocation Path: " + property.getGenerateTempBuildLocation());
+
+		monitor.worked(100);
+		monitor.done();
 	}
 }

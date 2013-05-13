@@ -8,30 +8,24 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.QualifiedName;
 import org.lo.d.eclipseplugin.mcp.model.StringSerializerCollection.Converter;
+import org.lo.d.eclipseplugin.mcp.model.StringSerializerCollection.Converter.ConversionException;
 import org.lo.d.eclipseplugin.mcp.model.StringSerializerCollection.PerseListener;
 
-public abstract class ResourcePersistantPropertyListenerModel extends
-		AbstractPropertyListenerModel implements ResourcePersistantData {
+public abstract class ResourcePersistantPropertyListenerModel extends AbstractPropertyListenerModel implements ResourcePersistantData {
 
-	public interface ListenerCollectionResourcePersistantProperty<V> extends
-			ListenerCollectionProperty<V>,
-			ListenerResourcePersistantProperty<V> {
+	public interface ListenerCollectionResourcePersistantProperty<V> extends ListenerCollectionProperty<V>, ListenerResourcePersistantProperty<V> {
 	}
 
-	public interface ListenerResourcePersistantProperty<V> extends
-			ListenerProperty<V>, ResourcePersistantData {
+	public interface ListenerResourcePersistantProperty<V> extends ListenerProperty<V>, ResourcePersistantData {
 	}
 
-	protected static class ListenerCollectionResourcePersistantPropertyImpl<V, CL extends Collection<V>>
-			extends
-			ListenerCollectionPropertyImpl<V, StringSerializerCollection<V, CL>>
-			implements ListenerCollectionResourcePersistantProperty<V> {
+	protected static class ListenerCollectionResourcePersistantPropertyImpl<V, CL extends Collection<V>> extends
+			ListenerCollectionPropertyImpl<V, StringSerializerCollection<V, CL>> implements ListenerCollectionResourcePersistantProperty<V> {
 
 		private final PerseListener<V> persistantValuePerseListener = new PerseListener<V>() {
 			@Override
 			public void handle(V value) {
-				ListenerCollectionResourcePersistantPropertyImpl.this
-						.add(value);
+				ListenerCollectionResourcePersistantPropertyImpl.this.add(value);
 			}
 		};
 
@@ -40,16 +34,14 @@ public abstract class ResourcePersistantPropertyListenerModel extends
 
 		private final String defaultValue;
 
-		protected ListenerCollectionResourcePersistantPropertyImpl(
-				String qualifier, String localName, String defaultValue,
-				CL values, Converter<V> converter) {
+		protected ListenerCollectionResourcePersistantPropertyImpl(String qualifier, String localName, String defaultValue, CL values, Converter<V> converter) {
 			super(new StringSerializerCollection<V, CL>(values, converter));
 			this.key = new QualifiedName(qualifier, localName);
 			this.defaultValue = defaultValue;
 		}
 
 		@Override
-		public void load() {
+		public void load() throws ConversionException {
 			try {
 				String value = resource.getPersistentProperty(key);
 				if (value != null) {
@@ -59,17 +51,19 @@ public abstract class ResourcePersistantPropertyListenerModel extends
 				}
 			} catch (CoreException e) {
 				loadDefault();
+			} catch (ConversionException e) {
+				loadDefault();
 			}
 		}
 
 		@Override
-		public void loadDefault() {
+		public void loadDefault() throws ConversionException {
 			clear();
 			values.parse(defaultValue, persistantValuePerseListener);
 		}
 
 		@Override
-		public void save() {
+		public void save() throws ConversionException {
 			try {
 				resource.setPersistentProperty(key, values.serialize());
 			} catch (CoreException e) {
@@ -83,9 +77,7 @@ public abstract class ResourcePersistantPropertyListenerModel extends
 
 	}
 
-	protected static class ListenerResourcePersistantPropertyImpl<V> extends
-			ListenerPropertyImpl<V> implements
-			ListenerResourcePersistantProperty<V> {
+	protected static class ListenerResourcePersistantPropertyImpl<V> extends ListenerPropertyImpl<V> implements ListenerResourcePersistantProperty<V> {
 
 		public interface Converter<V> {
 			String toString(V value);
@@ -100,8 +92,7 @@ public abstract class ResourcePersistantPropertyListenerModel extends
 		private final V defaultValue;
 		private final Converter<V> converter;
 
-		protected ListenerResourcePersistantPropertyImpl(String qualifier,
-				String localName, V defaultValue, Converter<V> converter) {
+		protected ListenerResourcePersistantPropertyImpl(String qualifier, String localName, V defaultValue, Converter<V> converter) {
 			super();
 			this.key = new QualifiedName(qualifier, localName);
 			this.defaultValue = defaultValue;
@@ -130,8 +121,7 @@ public abstract class ResourcePersistantPropertyListenerModel extends
 		@Override
 		public void save() {
 			try {
-				resource.setPersistentProperty(key,
-						converter.toString(getValue()));
+				resource.setPersistentProperty(key, converter.toString(getValue()));
 			} catch (CoreException e) {
 			}
 		}
@@ -145,26 +135,25 @@ public abstract class ResourcePersistantPropertyListenerModel extends
 	private final Set<Field> fields;
 
 	public ResourcePersistantPropertyListenerModel() {
-		fields = getField(ListenerResourcePersistantProperty.class,
-				this.getClass());
+		fields = getField(ListenerResourcePersistantProperty.class, this.getClass());
 	}
 
 	@Override
-	public void load() {
+	public void load() throws ConversionException {
 		for (ListenerResourcePersistantProperty property : getProperties()) {
 			property.load();
 		}
 	}
 
 	@Override
-	public void loadDefault() {
+	public void loadDefault() throws ConversionException {
 		for (ListenerResourcePersistantProperty property : getProperties()) {
 			property.loadDefault();
 		}
 	}
 
 	@Override
-	public void save() {
+	public void save() throws ConversionException {
 		for (ListenerResourcePersistantProperty property : getProperties()) {
 			property.save();
 		}

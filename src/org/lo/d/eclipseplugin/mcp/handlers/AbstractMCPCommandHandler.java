@@ -10,8 +10,14 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchPage;
@@ -24,8 +30,11 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.lo.d.eclipseplugin.mcp.model.DirectoryItems.DirectoryItemRootNode;
 import org.lo.d.eclipseplugin.mcp.model.MCPPropertyModel;
 import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.WorkspaceNode;
+import org.lo.d.eclipseplugin.mcp.model.StringSerializerCollection.Converter.ConversionException;
+import org.lo.d.eclipseplugin.mcp.process.OSSupport;
 import org.lo.d.eclipseplugin.mcp.resource.support.ProjectPathResolver;
 
 public abstract class AbstractMCPCommandHandler extends AbtractMCPBuildPropertyHandler {
@@ -40,11 +49,14 @@ public abstract class AbstractMCPCommandHandler extends AbtractMCPBuildPropertyH
 	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		final ISelection selection = HandlerUtil.getCurrentSelectionChecked(event);
 		if (!(selection instanceof IStructuredSelection)) {
-			throw new ExecutionException("Selection is unknown selection type.");
+			if (selection instanceof TextSelection) {
+				System.out.println("TextSelection:" + ((TextSelection) selection).getText());
+			}
+			throw new ExecutionException("Selection is unknown selection type:" + selection);
 		}
-		Object selectionElement = ((IStructuredSelection) selection).getFirstElement();
+		final Object selectionElement = ((IStructuredSelection) selection).getFirstElement();
 		if (!(selectionElement instanceof IProject) && !(selectionElement instanceof IJavaProject)) {
 			throw new ExecutionException("Selection type is not project.");
 		}
@@ -53,31 +65,6 @@ public abstract class AbstractMCPCommandHandler extends AbtractMCPBuildPropertyH
 		} else {
 			project = (IProject) selectionElement;
 		}
-
-		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		IWorkspaceRoot root = workspace.getRoot();
-		WorkspaceNode workspaceNode = new WorkspaceNode(root);
-		MCPPropertyModel propertyModel = new MCPPropertyModel(Activator.PLUGIN_ID, workspaceNode);
-		propertyModel.setResource(project);
-		propertyModel.load();
-
-		property = propertyModel.getValueAccessor();
-
-		try {
-			mcpLocation = ProjectPathResolver.getResolvedFile(property.getMcpLocation(), project);
-		} catch (JavaModelException e) {
-			throw new ExecutionException(e.getMessage(), e);
-		} catch (URISyntaxException e) {
-			throw new ExecutionException(e.getMessage(), e);
-		}
-		try {
-			generateTempBuildLocation = ProjectPathResolver.getResolvedFile(property.getGenerateTempBuildLocation(), project);
-		} catch (JavaModelException e) {
-			throw new ExecutionException(e.getMessage(), e);
-		} catch (URISyntaxException e) {
-			throw new ExecutionException(e.getMessage(), e);
-		}
-
 		MessageConsole console;
 		try {
 			console = showConsole(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage());
@@ -86,14 +73,65 @@ public abstract class AbstractMCPCommandHandler extends AbtractMCPBuildPropertyH
 		}
 		console.clearConsole();
 
-		NestMessageConsole out = new NestMessageConsole(console.newMessageStream());
-		System.out.println(console.getEncoding());
+		final NestMessageConsole out = new NestMessageConsole(console.newMessageStream());
+		Job job = new Job("MCP build process") {
+			@Override
+			public IStatus run(IProgressMonitor monitor) {
+				monitor.beginTask("processing...", 100);
 
-		out.println("Start MCP build process.");
+				IProgressMonitor subMonitor;
+				try {
+					monitor.subTask("loading property.");
+					subMonitor = new SubProgressMonitor(monitor, 10);
+					subMonitor.beginTask("loading property.", 1);
+					IWorkspace workspace = ResourcesPlugin.getWorkspace();
+					IWorkspaceRoot root = workspace.getRoot();
+					WorkspaceNode workspaceNode = new WorkspaceNode(root);
+					DirectoryItemRootNode directoryItemRootNode = new DirectoryItemRootNode(root);
+					MCPPropertyModel propertyModel = new MCPPropertyModel(Activator.PLUGIN_ID, workspaceNode, directoryItemRootNode);
 
-		command(out);
+					propertyModel.setResource(project);
+					try {
+						propertyModel.load();
+					} catch (ConversionException e) {
+						throw new ExecutionException(e.getMessage(), e);
+					}
 
-		out.println("End MCP build process.");
+					property = propertyModel.getValueAccessor();
+
+					try {
+						mcpLocation = ProjectPathResolver.getResolvedFile(property.getMcpLocation(), project);
+					} catch (JavaModelException e) {
+						throw new ExecutionException(e.getMessage(), e);
+					} catch (URISyntaxException e) {
+						throw new ExecutionException(e.getMessage(), e);
+					}
+					try {
+						generateTempBuildLocation = ProjectPathResolver.getResolvedFile(property.getGenerateTempBuildLocation(), project);
+					} catch (JavaModelException e) {
+						throw new ExecutionException(e.getMessage(), e);
+					} catch (URISyntaxException e) {
+						throw new ExecutionException(e.getMessage(), e);
+					}
+					subMonitor.worked(1);
+					subMonitor.done();
+
+					out.println("Start MCP build process.");
+
+					subMonitor = new SubProgressMonitor(monitor, 90);
+					command(out, subMonitor);
+					subMonitor.done();
+
+					out.println("End MCP build process.");
+				} catch (ExecutionException e) {
+					e.printStackTrace(out);
+				}
+				monitor.done();
+				return Status.OK_STATUS;
+			}
+		};
+		job.setUser(true); // ダイアログを出す
+		job.schedule();
 		return null;
 	}
 
@@ -105,7 +143,7 @@ public abstract class AbstractMCPCommandHandler extends AbtractMCPBuildPropertyH
 		return console;
 	}
 
-	protected abstract void command(NestMessageConsole out) throws ExecutionException;
+	protected abstract void command(NestMessageConsole out, IProgressMonitor monitor) throws ExecutionException;
 
 	private MessageConsole findConsole(String name) {
 		ConsolePlugin plugin = ConsolePlugin.getDefault();
@@ -115,7 +153,7 @@ public abstract class AbstractMCPCommandHandler extends AbtractMCPBuildPropertyH
 			if (name.equals(existing[i].getName()))
 				return (MessageConsole) existing[i];
 		// no console found, so create a new one
-		MessageConsole myConsole = new MessageConsole(name, IConsoleConstants.MESSAGE_CONSOLE_TYPE, null, "MS932", true);
+		MessageConsole myConsole = new MessageConsole(name, IConsoleConstants.MESSAGE_CONSOLE_TYPE, null, OSSupport.getOSConsoleCharset().name(), true);
 		conMan.addConsoles(new IConsole[] {
 			myConsole
 		});

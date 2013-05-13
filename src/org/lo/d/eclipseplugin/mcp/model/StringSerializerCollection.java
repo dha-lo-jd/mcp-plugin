@@ -7,13 +7,28 @@ import java.util.List;
 
 import org.lo.d.eclipseplugin.mcp.model.StringSerializerCollection.Converter.ConversionException;
 
-public class StringSerializerCollection<E, CL extends Collection<E>> implements
-		Collection<E> {
+public class StringSerializerCollection<E, CL extends Collection<E>> implements Collection<E> {
 	public interface Converter<E> {
 		public class ConversionException extends Exception {
+
+			public ConversionException() {
+				super();
+			}
+
+			public ConversionException(String arg0) {
+				super(arg0);
+			}
+
+			public ConversionException(String message, Throwable cause) {
+				super(message, cause);
+			}
+
+			public ConversionException(Throwable cause) {
+				super(cause.getMessage(), cause);
+			}
 		}
 
-		String toString(E value);
+		String toString(E value) throws ConversionException;
 
 		E valueOf(String str) throws ConversionException;
 	}
@@ -24,25 +39,19 @@ public class StringSerializerCollection<E, CL extends Collection<E>> implements
 
 	private static final String DELIMITER = ";";
 
-	public static <E> StringSerializerCollection<E, List<E>> newInstance(
-			Converter<E> converter) {
+	public static <E> StringSerializerCollection<E, List<E>> newInstance(Converter<E> converter) {
 		return newInstance(DELIMITER, converter);
 	}
 
-	public static <E> StringSerializerCollection<E, List<E>> newInstance(
-			String delimiter, Converter<E> converter) {
-		return new StringSerializerCollection<E, List<E>>(new ArrayList<E>(),
-				delimiter, converter);
+	public static <E> StringSerializerCollection<E, List<E>> newInstance(String delimiter, Converter<E> converter) {
+		return new StringSerializerCollection<E, List<E>>(new ArrayList<E>(), delimiter, converter);
 	}
 
-	public static <E> StringSerializerCollection<E, List<E>> newParsedInstance(
-			String str, Converter<E> converter) throws ConversionException {
+	public static <E> StringSerializerCollection<E, List<E>> newParsedInstance(String str, Converter<E> converter) throws ConversionException {
 		return newParsedInstance(str, DELIMITER, converter);
 	}
 
-	public static <E> StringSerializerCollection<E, List<E>> newParsedInstance(
-			String str, String delimiter, Converter<E> converter)
-			throws ConversionException {
+	public static <E> StringSerializerCollection<E, List<E>> newParsedInstance(String str, String delimiter, Converter<E> converter) throws ConversionException {
 		return newInstance(delimiter, converter).parse(str);
 	}
 
@@ -62,8 +71,7 @@ public class StringSerializerCollection<E, CL extends Collection<E>> implements
 		this(collection, DELIMITER, converter);
 	}
 
-	private StringSerializerCollection(CL collection, String delimiter,
-			Converter<E> converter) {
+	private StringSerializerCollection(CL collection, String delimiter, Converter<E> converter) {
 		super();
 		this.collection = collection;
 		this.delimiter = delimiter;
@@ -105,16 +113,17 @@ public class StringSerializerCollection<E, CL extends Collection<E>> implements
 		return collection.iterator();
 	}
 
-	public StringSerializerCollection<E, CL> parse(String str)
-			throws ConversionException {
+	public StringSerializerCollection<E, CL> parse(String str) throws ConversionException {
 		return parse(str, simplePerseListener);
 	}
 
-	public StringSerializerCollection<E, CL> parse(String str,
-			PerseListener<E> listener) {
+	public StringSerializerCollection<E, CL> parse(String str, PerseListener<E> listener) {
+		if (str == null || str.isEmpty()) {
+			return this;
+		}
 		String[] args = str.split(delimiter);
 		if (args == null || args.length == 0) {
-			return null;
+			return this;
 		}
 
 		for (String arg : args) {
@@ -142,7 +151,7 @@ public class StringSerializerCollection<E, CL extends Collection<E>> implements
 		return collection.retainAll(c);
 	}
 
-	public String serialize() {
+	public String serialize() throws ConversionException {
 		StringBuilder sb = new StringBuilder();
 		String sep = "";
 		for (E element : collection) {

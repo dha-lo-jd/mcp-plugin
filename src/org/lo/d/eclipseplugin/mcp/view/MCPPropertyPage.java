@@ -18,8 +18,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.PropertyPage;
+import org.lo.d.eclipseplugin.mcp.model.DirectoryItems.DirectoryItemRootNode;
 import org.lo.d.eclipseplugin.mcp.model.MCPPropertyModel;
 import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.WorkspaceNode;
+import org.lo.d.eclipseplugin.mcp.model.StringSerializerCollection.Converter.ConversionException;
 
 public class MCPPropertyPage extends PropertyPage {
 
@@ -34,7 +36,11 @@ public class MCPPropertyPage extends PropertyPage {
 
 	@Override
 	public boolean performOk() {
-		propertyModel.save();
+		try {
+			propertyModel.save();
+		} catch (ConversionException e) {
+			new RuntimeException(e);
+		}
 		return true;
 	}
 
@@ -47,8 +53,13 @@ public class MCPPropertyPage extends PropertyPage {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
 		WorkspaceNode workspaceNode = new WorkspaceNode(root);
+		DirectoryItemRootNode directoryItemRootNode = new DirectoryItemRootNode(root);
 
-		initModel(workspaceNode);
+		try {
+			initModel(workspaceNode, directoryItemRootNode);
+		} catch (ConversionException e) {
+			throw new RuntimeException(e);
+		}
 
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -82,6 +93,12 @@ public class MCPPropertyPage extends PropertyPage {
 				tabItemTargetSrcSettings.setText("対象ソース・ロケーション");
 				tabItemTargetSrcSettings.setControl(new SourceLocationTreeView(tabFolder, SWT.NONE, workspaceNode, propertyModel.getTargetSrcLocations()));
 			}
+			{
+				CTabItem tabItemTargetSrcSettings = new CTabItem(tabFolder, SWT.NONE);
+				tabItemTargetSrcSettings.setText("リソース・ロケーション");
+				tabItemTargetSrcSettings.setControl(new DirectoryItemFileTreeView(tabFolder, SWT.NONE, directoryItemRootNode, propertyModel
+						.getResourceLocations()));
+			}
 		}
 
 		return composite;
@@ -90,7 +107,11 @@ public class MCPPropertyPage extends PropertyPage {
 	@Override
 	protected void performDefaults() {
 		super.performDefaults();
-		propertyModel.loadDefault();
+		try {
+			propertyModel.loadDefault();
+		} catch (ConversionException e) {
+			new RuntimeException(e);
+		}
 	}
 
 	private Composite createDefaultComposite(Composite parent) {
@@ -120,8 +141,8 @@ public class MCPPropertyPage extends PropertyPage {
 		}
 	}
 
-	private void initModel(WorkspaceNode workspaceNode) {
-		propertyModel = new MCPPropertyModel(Activator.PLUGIN_ID, workspaceNode);
+	private void initModel(WorkspaceNode workspaceNode, DirectoryItemRootNode directoryItemRootNode) throws ConversionException {
+		propertyModel = new MCPPropertyModel(Activator.PLUGIN_ID, workspaceNode, directoryItemRootNode);
 		propertyModel.setResource(getProject());
 		propertyModel.load();
 	}

@@ -3,10 +3,14 @@ package org.lo.d.eclipseplugin.mcp.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.lo.d.eclipseplugin.mcp.model.AbstractNodeTree.Node;
+import org.lo.d.eclipseplugin.mcp.model.DirectoryItems.DirectoryItemNode;
+import org.lo.d.eclipseplugin.mcp.model.DirectoryItems.DirectoryItemNodeConverter;
+import org.lo.d.eclipseplugin.mcp.model.DirectoryItems.DirectoryItemRootNode;
 import org.lo.d.eclipseplugin.mcp.model.ResourcePersistantPropertyListenerModel.ListenerResourcePersistantPropertyImpl.Converter;
-import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.Node;
 import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.SourceNode;
 import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.SourceNodeConverter;
+import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.WorkspaceNode;
 
 public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 	public static class ValueAccessor {
@@ -22,6 +26,8 @@ public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 		private Set<SourceNode> dependencySrcLocations = new HashSet<SourceNode>();
 
 		private Set<SourceNode> targetSrcLocations = new HashSet<SourceNode>();
+
+		private Set<DirectoryItemNode> resourceLocations = new HashSet<DirectoryItemNode>();
 
 		private ValueAccessor(MCPPropertyModel propertyModel) {
 			propertyModel.getMcpLocation().addReceiver(new SimpleValueReceiver<String>() {
@@ -58,6 +64,17 @@ public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 					targetSrcLocations.remove(value);
 				}
 			});
+			propertyModel.getResourceLocations().addReceiver(new SimpleValueReceiver<DirectoryItemNode>() {
+				@Override
+				public void add(DirectoryItemNode value) {
+					resourceLocations.add(value);
+				}
+
+				@Override
+				public void remove(DirectoryItemNode value) {
+					resourceLocations.remove(value);
+				}
+			});
 		}
 
 		public Set<SourceNode> getDependencySrcLocations() {
@@ -70,6 +87,10 @@ public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 
 		public String getMcpLocation() {
 			return mcpLocation;
+		}
+
+		public Set<DirectoryItemNode> getResourceLocations() {
+			return resourceLocations;
 		}
 
 		public Set<SourceNode> getTargetSrcLocations() {
@@ -100,9 +121,13 @@ public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 	private final ListenerResourcePersistantProperty<String> mcpLocation;
 	private final ListenerResourcePersistantProperty<String> generateTempBuildLocation;
 
+	private final ListenerCollectionResourcePersistantProperty<DirectoryItemNode> resourceLocations;
+
 	private final ValueAccessor valueAccessor;
 
-	public MCPPropertyModel(String key, Node root) {
+	private final DirectoryItemRootNode resourceLocationRootNode;
+
+	public MCPPropertyModel(String key, WorkspaceNode root, DirectoryItemRootNode directoryItemRootNode) {
 		dependencySrcLocations = new ListenerCollectionResourcePersistantPropertyImpl(key, "dependencySrcLocations", "", new HashSet<Node>(),
 				new SourceNodeConverter(root));
 		targetSrcLocations = new ListenerCollectionResourcePersistantPropertyImpl(key, "targetSrcLocations", "", new HashSet<Node>(), new SourceNodeConverter(
@@ -110,6 +135,10 @@ public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 		mcpLocation = new ListenerResourcePersistantPropertyImpl(key, "mcpLocation", DEFAULT_MCP_LOC, new LocationConverter());
 		generateTempBuildLocation = new ListenerResourcePersistantPropertyImpl(key, "generateTempBuildLocation", DEFAULT_MCP_BUILD_TEMP,
 				new LocationConverter());
+
+		resourceLocationRootNode = directoryItemRootNode;
+		resourceLocations = new ListenerCollectionResourcePersistantPropertyImpl(key, "resourceLocations", "", new HashSet<Node>(),
+				new DirectoryItemNodeConverter(directoryItemRootNode));
 
 		valueAccessor = new ValueAccessor(this);
 	}
@@ -124,6 +153,10 @@ public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 
 	public ListenerResourcePersistantProperty<String> getMcpLocation() {
 		return mcpLocation;
+	}
+
+	public ListenerCollectionResourcePersistantProperty<DirectoryItemNode> getResourceLocations() {
+		return resourceLocations;
 	}
 
 	public ListenerCollectionResourcePersistantProperty<SourceNode> getTargetSrcLocations() {

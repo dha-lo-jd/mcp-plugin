@@ -1,6 +1,8 @@
 package org.lo.d.eclipseplugin.mcp.handlers;
 
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.lo.d.eclipseplugin.mcp.commands.BuildCommand;
 import org.lo.d.eclipseplugin.mcp.commands.CompressCommand;
 import org.lo.d.eclipseplugin.mcp.commands.ReobfucateCommand;
@@ -20,18 +22,29 @@ public class AllCommandHandler extends AbstractMCPCommandHandler {
 	}
 
 	@Override
-	protected void command(NestMessageConsole out) throws ExecutionException {
-		{
-			BuildCommand command = new UpdateMD5Command(this, out);
-			command.run();
-		}
-		{
-			BuildCommand command = new ReobfucateCommand(this, out);
-			command.run();
-		}
-		{
-			BuildCommand command = new CompressCommand(this, out);
-			command.run();
+	protected void command(final NestMessageConsole out, IProgressMonitor monitor) throws ExecutionException {
+		monitor.beginTask("", 300);
+		try {
+			{
+				IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 100);
+				BuildCommand command = new UpdateMD5Command(AllCommandHandler.this, out);
+				command.run(subMonitor);
+				subMonitor.done();
+			}
+			{
+				IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 100);
+				BuildCommand command = new ReobfucateCommand(AllCommandHandler.this, out);
+				command.run(subMonitor);
+				subMonitor.done();
+			}
+			{
+				IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 100);
+				BuildCommand command = new CompressCommand(AllCommandHandler.this, out);
+				command.run(subMonitor);
+				subMonitor.done();
+			}
+		} catch (ExecutionException e) {
+			e.printStackTrace();
 		}
 	}
 
