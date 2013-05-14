@@ -43,7 +43,7 @@ public class CompressCommand extends AbstractBuildCommand {
 			}
 
 			File zipLocation = property.getProject().getLocation().toFile();
-			String zipFileName = "mod_" + property.getProject().getName();
+			String zipFileName = property.getProperty().getOutputFileName();
 			File zipFile = new File(zipLocation, zipFileName + ".zip");
 			if (zipFile.exists()) {
 				int i = 1;

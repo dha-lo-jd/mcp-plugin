@@ -7,9 +7,11 @@ import mcp_plugin.Activator;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -29,6 +31,7 @@ import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.IConsoleView;
 import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.lo.d.eclipseplugin.mcp.model.DirectoryItems.DirectoryItemRootNode;
 import org.lo.d.eclipseplugin.mcp.model.MCPPropertyModel;
@@ -65,15 +68,16 @@ public abstract class AbstractMCPCommandHandler extends AbtractMCPBuildPropertyH
 		} else {
 			project = (IProject) selectionElement;
 		}
-		MessageConsole console;
+		MessageConsole cosl;
 		try {
-			console = showConsole(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage());
+			cosl = showConsole(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage());
 		} catch (PartInitException e) {
 			throw new ExecutionException(e.getMessage(), e);
 		}
-		console.clearConsole();
+		cosl.clearConsole();
 
-		final NestMessageConsole out = new NestMessageConsole(console.newMessageStream());
+		final NestMessageConsole console = new NestMessageConsole(cosl);
+		final MessageConsoleStream out = console.newMessageStream();
 		Job job = new Job("MCP build process") {
 			@Override
 			public IStatus run(IProgressMonitor monitor) {
@@ -88,7 +92,7 @@ public abstract class AbstractMCPCommandHandler extends AbtractMCPBuildPropertyH
 					IWorkspaceRoot root = workspace.getRoot();
 					WorkspaceNode workspaceNode = new WorkspaceNode(root);
 					DirectoryItemRootNode directoryItemRootNode = new DirectoryItemRootNode(root);
-					MCPPropertyModel propertyModel = new MCPPropertyModel(Activator.PLUGIN_ID, workspaceNode, directoryItemRootNode);
+					MCPPropertyModel propertyModel = new MCPPropertyModel(Activator.PLUGIN_ID, workspaceNode, directoryItemRootNode, project);
 
 					propertyModel.setResource(project);
 					try {
@@ -119,14 +123,21 @@ public abstract class AbstractMCPCommandHandler extends AbtractMCPBuildPropertyH
 					out.println("Start MCP build process.");
 
 					subMonitor = new SubProgressMonitor(monitor, 90);
-					command(out, subMonitor);
+					command(console, subMonitor);
 					subMonitor.done();
 
 					out.println("End MCP build process.");
 				} catch (ExecutionException e) {
-					e.printStackTrace(out);
+					e.printStackTrace(console.newPrintStream());
 				}
+				try {
+					project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+				} catch (CoreException e) {
+					e.printStackTrace(console.newPrintStream());
+				}
+
 				monitor.done();
+
 				return Status.OK_STATUS;
 			}
 		};

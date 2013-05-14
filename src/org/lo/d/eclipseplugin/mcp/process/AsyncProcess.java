@@ -43,8 +43,14 @@ public class AsyncProcess {
 			int b;
 			try {
 				if (in != null && out != null) {
+					int intervalFlush = 100;
 					while ((b = in.read()) != -1) {
 						out.write(b);
+						intervalFlush--;
+						if (intervalFlush <= 0) {
+							intervalFlush = 100;
+							out.flush();
+						}
 					}
 					out.flush();
 				} else if (in != null) {

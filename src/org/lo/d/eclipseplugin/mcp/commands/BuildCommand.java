@@ -14,6 +14,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.lo.d.eclipseplugin.mcp.handlers.MCPBuildProperty;
 import org.lo.d.eclipseplugin.mcp.handlers.NestMessageConsole;
+import org.lo.d.eclipseplugin.mcp.handlers.NestMessageConsole.NestedMessageConsoleStream;
 
 public interface BuildCommand {
 	public abstract class AbstractBuildCommand implements BuildCommand {
@@ -69,15 +70,15 @@ public interface BuildCommand {
 
 		protected final MCPBuildProperty property;
 
-		protected final NestMessageConsole out;
+		protected final NestedMessageConsoleStream out;
 
 		protected final String name;
 
 		protected IProgressMonitor monitor;
 
-		protected AbstractBuildCommand(MCPBuildProperty property, NestMessageConsole out, String name) {
+		protected AbstractBuildCommand(MCPBuildProperty property, NestMessageConsole console, String name) {
 			this.property = property;
-			this.out = out;
+			out = console.newMessageStream();
 			this.name = name;
 		}
 
@@ -96,6 +97,21 @@ public interface BuildCommand {
 			runCommand();
 			out.println("End process: " + name);
 			out.endNest();
+		}
+
+		@Deprecated
+		protected void _creanDirectory(Path path) {
+			File rootFile = path.toFile();
+			if (!rootFile.isDirectory()) {
+				return;
+			}
+
+			FilesCount fileCounts = new FilesCount();
+			for (File file : rootFile.listFiles()) {
+				fileCounts.add(deleteDirectoryAndFiles(file));
+			}
+
+			out.println(String.format("Cleaned %s. dirs:%d, files:%d.", path, fileCounts.dirs, fileCounts.files));
 		}
 
 		protected void copyFile(Path linkPath, Path entityPath) throws ExecutionException {
@@ -123,12 +139,12 @@ public interface BuildCommand {
 				return;
 			}
 
-			FilesCount fileCounts = new FilesCount();
-			for (File file : rootFile.listFiles()) {
-				fileCounts.add(deleteDirectoryAndFiles(file));
-			}
+			File oldFile = getOldFile(path, 1);
+			rootFile.renameTo(oldFile);
 
-			out.println(String.format("Cleaned %s. dirs:%d, files:%d.", path, fileCounts.dirs, fileCounts.files));
+			rootFile.mkdirs();
+
+			out.println(String.format("Cleaned %s. moved to %s.", path, oldFile.getName()));
 		}
 
 		protected void createDirectory(Path path) throws ExecutionException {
@@ -195,6 +211,14 @@ public interface BuildCommand {
 		}
 
 		protected abstract void runCommand() throws ExecutionException;
+
+		private File getOldFile(Path path, int i) {
+			File oldFile = path.resolveSibling(path.getFileName() + "_" + i).toFile();
+			if (oldFile.exists()) {
+				oldFile = getOldFile(path, ++i);
+			}
+			return oldFile;
+		}
 	}
 
 	public int getCommandCount();

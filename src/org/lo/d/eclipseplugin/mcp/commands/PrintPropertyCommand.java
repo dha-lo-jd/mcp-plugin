@@ -4,6 +4,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.lo.d.eclipseplugin.mcp.commands.BuildCommand.AbstractBuildCommand;
 import org.lo.d.eclipseplugin.mcp.handlers.MCPBuildProperty;
 import org.lo.d.eclipseplugin.mcp.handlers.NestMessageConsole;
+import org.lo.d.eclipseplugin.mcp.handlers.NestMessageConsole.NestedMessageConsoleStream;
 import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.SourceNode;
 
 public class PrintPropertyCommand extends AbstractBuildCommand {
@@ -20,7 +21,7 @@ public class PrintPropertyCommand extends AbstractBuildCommand {
 		out.endNest();
 	}
 
-	private void printMCPProperty(NestMessageConsole out) throws ExecutionException {
+	private void printMCPProperty(NestedMessageConsoleStream out) throws ExecutionException {
 		out.println("McpLocation: " + property.getMcpLocation());
 		out.println("GenerateTempBuildLocation: " + property.getGenerateTempBuildLocation());
 

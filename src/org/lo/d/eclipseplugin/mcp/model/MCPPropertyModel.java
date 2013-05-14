@@ -3,6 +3,7 @@ package org.lo.d.eclipseplugin.mcp.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
 import org.lo.d.eclipseplugin.mcp.model.AbstractNodeTree.Node;
 import org.lo.d.eclipseplugin.mcp.model.DirectoryItems.DirectoryItemNode;
 import org.lo.d.eclipseplugin.mcp.model.DirectoryItems.DirectoryItemNodeConverter;
@@ -23,6 +24,8 @@ public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 		private String mcpLocation;
 		private String generateTempBuildLocation;
 
+		private String outputFileName;
+
 		private Set<SourceNode> dependencySrcLocations = new HashSet<SourceNode>();
 
 		private Set<SourceNode> targetSrcLocations = new HashSet<SourceNode>();
@@ -40,6 +43,12 @@ public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 				@Override
 				public void add(String value) {
 					generateTempBuildLocation = value;
+				}
+			});
+			propertyModel.getOutputFileName().addReceiver(new SimpleValueReceiver<String>() {
+				@Override
+				public void add(String value) {
+					outputFileName = value;
 				}
 			});
 			propertyModel.getDependencySrcLocations().addReceiver(new SimpleValueReceiver<SourceNode>() {
@@ -89,6 +98,10 @@ public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 			return mcpLocation;
 		}
 
+		public String getOutputFileName() {
+			return outputFileName;
+		}
+
 		public Set<DirectoryItemNode> getResourceLocations() {
 			return resourceLocations;
 		}
@@ -123,11 +136,13 @@ public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 
 	private final ListenerCollectionResourcePersistantProperty<DirectoryItemNode> resourceLocations;
 
+	private final ListenerResourcePersistantProperty<String> outputFileName;
+
 	private final ValueAccessor valueAccessor;
 
 	private final DirectoryItemRootNode resourceLocationRootNode;
 
-	public MCPPropertyModel(String key, WorkspaceNode root, DirectoryItemRootNode directoryItemRootNode) {
+	public MCPPropertyModel(String key, WorkspaceNode root, DirectoryItemRootNode directoryItemRootNode, IProject project) {
 		dependencySrcLocations = new ListenerCollectionResourcePersistantPropertyImpl(key, "dependencySrcLocations", "", new HashSet<Node>(),
 				new SourceNodeConverter(root));
 		targetSrcLocations = new ListenerCollectionResourcePersistantPropertyImpl(key, "targetSrcLocations", "", new HashSet<Node>(), new SourceNodeConverter(
@@ -139,6 +154,8 @@ public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 		resourceLocationRootNode = directoryItemRootNode;
 		resourceLocations = new ListenerCollectionResourcePersistantPropertyImpl(key, "resourceLocations", "", new HashSet<Node>(),
 				new DirectoryItemNodeConverter(directoryItemRootNode));
+
+		outputFileName = new ListenerResourcePersistantPropertyImpl(key, "outputFileName", "mod_" + project.getName(), new LocationConverter());
 
 		valueAccessor = new ValueAccessor(this);
 	}
@@ -153,6 +170,10 @@ public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 
 	public ListenerResourcePersistantProperty<String> getMcpLocation() {
 		return mcpLocation;
+	}
+
+	public ListenerResourcePersistantProperty<String> getOutputFileName() {
+		return outputFileName;
 	}
 
 	public ListenerCollectionResourcePersistantProperty<DirectoryItemNode> getResourceLocations() {

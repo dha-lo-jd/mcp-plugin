@@ -55,6 +55,7 @@ public class MCPPropertyPage extends PropertyPage {
 		WorkspaceNode workspaceNode = new WorkspaceNode(root);
 		DirectoryItemRootNode directoryItemRootNode = new DirectoryItemRootNode(root);
 
+		IProject project = getProject();
 		try {
 			initModel(workspaceNode, directoryItemRootNode);
 		} catch (ConversionException e) {
@@ -76,8 +77,7 @@ public class MCPPropertyPage extends PropertyPage {
 				CTabItem tabItemMcpSettings = new CTabItem(tabFolder, SWT.NONE);
 				tabItemMcpSettings.setText("MCPロケーション");
 
-				tabItemMcpSettings.setControl(new MCPLocationView(tabFolder, SWT.NONE, getProject(), propertyModel.getMcpLocation(), propertyModel
-						.getGenerateTempBuildLocation()));
+				tabItemMcpSettings.setControl(new MCPLocationView(tabFolder, SWT.NONE, project, propertyModel));
 
 				tabFolder.setSelection(tabItemMcpSettings);
 			}
@@ -97,7 +97,7 @@ public class MCPPropertyPage extends PropertyPage {
 				CTabItem tabItemTargetSrcSettings = new CTabItem(tabFolder, SWT.NONE);
 				tabItemTargetSrcSettings.setText("リソース・ロケーション");
 				tabItemTargetSrcSettings.setControl(new DirectoryItemFileTreeView(tabFolder, SWT.NONE, directoryItemRootNode, propertyModel
-						.getResourceLocations()));
+						.getResourceLocations(), project.getLocation().toFile().toPath()));
 			}
 		}
 
@@ -131,7 +131,7 @@ public class MCPPropertyPage extends PropertyPage {
 	}
 
 	private IProject getProject() {
-		IAdaptable o = getElement();
+		final IAdaptable o = getElement();
 		if (o instanceof IJavaProject) {
 			return ((IJavaProject) o).getProject();
 		} else if (o instanceof IProject) {
@@ -142,7 +142,7 @@ public class MCPPropertyPage extends PropertyPage {
 	}
 
 	private void initModel(WorkspaceNode workspaceNode, DirectoryItemRootNode directoryItemRootNode) throws ConversionException {
-		propertyModel = new MCPPropertyModel(Activator.PLUGIN_ID, workspaceNode, directoryItemRootNode);
+		propertyModel = new MCPPropertyModel(Activator.PLUGIN_ID, workspaceNode, directoryItemRootNode, getProject());
 		propertyModel.setResource(getProject());
 		propertyModel.load();
 	}

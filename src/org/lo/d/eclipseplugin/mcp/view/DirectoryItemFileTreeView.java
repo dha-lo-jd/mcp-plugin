@@ -1,6 +1,7 @@
 package org.lo.d.eclipseplugin.mcp.view;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -67,10 +68,10 @@ public class DirectoryItemFileTreeView extends AbstractModelListnerTreeView<Tree
 	}
 
 	public DirectoryItemFileTreeView(Composite parent, int style, final DirectoryItemRootNode workspaceNode,
-			ListenerProperty<DirectoryItemNode> listenerProperty) {
+			ListenerProperty<DirectoryItemNode> listenerProperty, Path rootLacation) {
 		super(parent, style, new Initializer(listenerProperty, workspaceNode));
 
-		setupButtons(workspaceNode, listenerProperty);
+		setupButtons(workspaceNode, listenerProperty, rootLacation);
 	}
 
 	@Override
@@ -92,7 +93,7 @@ public class DirectoryItemFileTreeView extends AbstractModelListnerTreeView<Tree
 		setLayoutData(data);
 	}
 
-	private void setupButtons(final DirectoryItemRootNode workspaceNode, final ListenerProperty<DirectoryItemNode> listenerProperty) {
+	private void setupButtons(final DirectoryItemRootNode workspaceNode, final ListenerProperty<DirectoryItemNode> listenerProperty, final Path rootLacation) {
 		Composite buttons = new Composite(this, SWT.TOP);
 		GridLayout layout = new GridLayout();
 		layout.numColumns = 1;
@@ -122,6 +123,7 @@ public class DirectoryItemFileTreeView extends AbstractModelListnerTreeView<Tree
 				DirectoryDialog dialog = new DirectoryDialog(shell);
 				dialog.setText("フォルダの選択");
 				dialog.setMessage("リソース・ロケーションに追加");
+				dialog.setFilterPath(rootLacation.toString());
 				String path = dialog.open();
 
 				if (path != null && !path.isEmpty()) {
@@ -143,6 +145,7 @@ public class DirectoryItemFileTreeView extends AbstractModelListnerTreeView<Tree
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				FileDialog dialog = new FileDialog(shell);
 				dialog.setText("ファイルの選択");
+				dialog.setFilterPath(rootLacation.toString());
 				String path = dialog.open();
 
 				if (path != null && !path.isEmpty()) {
