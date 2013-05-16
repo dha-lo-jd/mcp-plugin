@@ -11,7 +11,8 @@ import org.lo.d.eclipseplugin.mcp.model.DirectoryItems.DirectoryItemRootNode;
 import org.lo.d.eclipseplugin.mcp.model.ResourcePersistantPropertyListenerModel.ListenerResourcePersistantPropertyImpl.Converter;
 import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.SourceNode;
 import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.SourceNodeConverter;
-import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.WorkspaceNode;
+import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.WorkspaceBinaryNode;
+import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.WorkspaceSourceNode;
 
 public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 	public static class ValueAccessor {
@@ -142,11 +143,12 @@ public class MCPPropertyModel extends ResourcePersistantPropertyListenerModel {
 
 	private final DirectoryItemRootNode resourceLocationRootNode;
 
-	public MCPPropertyModel(String key, WorkspaceNode root, DirectoryItemRootNode directoryItemRootNode, IProject project) {
+	public MCPPropertyModel(String key, WorkspaceSourceNode workspaceSourceNode, WorkspaceBinaryNode workspaceBinaryNode,
+			DirectoryItemRootNode directoryItemRootNode, IProject project) {
 		dependencySrcLocations = new ListenerCollectionResourcePersistantPropertyImpl(key, "dependencySrcLocations", "", new HashSet<Node>(),
-				new SourceNodeConverter(root));
+				new SourceNodeConverter(workspaceSourceNode));
 		targetSrcLocations = new ListenerCollectionResourcePersistantPropertyImpl(key, "targetSrcLocations", "", new HashSet<Node>(), new SourceNodeConverter(
-				root));
+				workspaceBinaryNode));
 		mcpLocation = new ListenerResourcePersistantPropertyImpl(key, "mcpLocation", DEFAULT_MCP_LOC, new LocationConverter());
 		generateTempBuildLocation = new ListenerResourcePersistantPropertyImpl(key, "generateTempBuildLocation", DEFAULT_MCP_BUILD_TEMP,
 				new LocationConverter());

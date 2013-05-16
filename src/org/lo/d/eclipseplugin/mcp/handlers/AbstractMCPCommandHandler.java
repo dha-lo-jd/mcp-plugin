@@ -35,7 +35,8 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.lo.d.eclipseplugin.mcp.model.DirectoryItems.DirectoryItemRootNode;
 import org.lo.d.eclipseplugin.mcp.model.MCPPropertyModel;
-import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.WorkspaceNode;
+import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.WorkspaceBinaryNode;
+import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.WorkspaceSourceNode;
 import org.lo.d.eclipseplugin.mcp.model.StringSerializerCollection.Converter.ConversionException;
 import org.lo.d.eclipseplugin.mcp.process.OSSupport;
 import org.lo.d.eclipseplugin.mcp.resource.support.ProjectPathResolver;
@@ -90,9 +91,11 @@ public abstract class AbstractMCPCommandHandler extends AbtractMCPBuildPropertyH
 					subMonitor.beginTask("loading property.", 1);
 					IWorkspace workspace = ResourcesPlugin.getWorkspace();
 					IWorkspaceRoot root = workspace.getRoot();
-					WorkspaceNode workspaceNode = new WorkspaceNode(root);
+					WorkspaceSourceNode workspaceSourceNode = new WorkspaceSourceNode(root);
+					WorkspaceBinaryNode workspaceBinaryNode = new WorkspaceBinaryNode(root);
 					DirectoryItemRootNode directoryItemRootNode = new DirectoryItemRootNode(root);
-					MCPPropertyModel propertyModel = new MCPPropertyModel(Activator.PLUGIN_ID, workspaceNode, directoryItemRootNode, project);
+					MCPPropertyModel propertyModel = new MCPPropertyModel(Activator.PLUGIN_ID, workspaceSourceNode, workspaceBinaryNode, directoryItemRootNode,
+							project);
 
 					propertyModel.setResource(project);
 					try {

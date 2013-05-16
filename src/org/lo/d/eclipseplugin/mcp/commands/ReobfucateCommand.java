@@ -12,6 +12,7 @@ import org.lo.d.eclipseplugin.mcp.handlers.NestMessageConsole;
 import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.SourceNode;
 
 public class ReobfucateCommand extends AbstractBuildCommand {
+
 	public ReobfucateCommand(MCPBuildProperty property, NestMessageConsole out) {
 		super(property, out, "Reobfucate");
 	}
@@ -20,10 +21,10 @@ public class ReobfucateCommand extends AbstractBuildCommand {
 	protected void runCommand() throws ExecutionException {
 		final File root = property.getGenerateTempBuildLocation();
 		Path rootPath = Paths.get(root.toURI());
-		Path srcPath = rootPath.resolve("src/minecraft");
+		Path srcPath = rootPath.resolve(MCP_DIR_BIN);
 
-		monitor.setTaskName("Copy src.");
-		out.println("Copy src.");
+		monitor.setTaskName("Copy bin.");
+		out.println("Copy bin.");
 		out.nest();
 		{
 			for (SourceNode node : property.getProperty().getTargetSrcLocations()) {
@@ -33,30 +34,28 @@ public class ReobfucateCommand extends AbstractBuildCommand {
 				}
 				File[] listFiles = f.listFiles();
 				SubProgressMonitor fMon;
-				fMon = new SubProgressMonitor(monitor, 20);
-				fMon.beginTask("Copy src.", listFiles.length);
+				fMon = new SubProgressMonitor(monitor, 25);
+				fMon.beginTask("Copy bin.", listFiles.length);
 				for (File file : listFiles) {
 					Path entityPath = Paths.get(file.toURI());
 					Path linkPath = srcPath.resolve(entityPath.getFileName());
 
 					fMon.subTask(linkPath.toString());
-					copyFile(linkPath, entityPath);
+					copyFile(linkPath, entityPath, "class");
 					fMon.worked(1);
 				}
 				fMon.done();
 			}
 		}
 		out.endNest();
-		monitor.worked(20);
+		monitor.worked(25);
 
-		MCPCommandSupport.recompile(root, out, monitor);
-		monitor.worked(20);
 		Path reobfPath = rootPath.resolve("reobf");
 		deleteDirectoryAndFiles(reobfPath.toFile());
 		createDirectory(reobfPath);
-		monitor.worked(20);
+		monitor.worked(25);
 		MCPCommandSupport.reobfuscate(root, out, monitor);
-		monitor.worked(20);
+		monitor.worked(25);
 
 		monitor.done();
 	}

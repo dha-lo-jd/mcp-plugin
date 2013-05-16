@@ -35,7 +35,7 @@ public class UpdateMD5Command extends AbstractBuildCommand {
 
 		final File root = property.getGenerateTempBuildLocation();
 		Path rootPath = Paths.get(root.toURI());
-		Path srcPath = rootPath.resolve("src/minecraft");
+		Path srcPath = rootPath.resolve(MCP_DIR_SRC);
 
 		monitor.setTaskName("Cleanup src.");
 		out.println("Cleanup src.");
@@ -60,7 +60,7 @@ public class UpdateMD5Command extends AbstractBuildCommand {
 					Path linkPath = srcPath.resolve(entityPath.getFileName());
 
 					fMon.subTask(linkPath.toString());
-					copyFile(linkPath, entityPath);
+					copyFile(linkPath, entityPath, "java");
 					fMon.worked(1);
 				}
 				fMon.done();

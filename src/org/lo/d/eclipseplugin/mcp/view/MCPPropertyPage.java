@@ -20,7 +20,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.lo.d.eclipseplugin.mcp.model.DirectoryItems.DirectoryItemRootNode;
 import org.lo.d.eclipseplugin.mcp.model.MCPPropertyModel;
-import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.WorkspaceNode;
+import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.WorkspaceBinaryNode;
+import org.lo.d.eclipseplugin.mcp.model.SourceLocationTree.WorkspaceSourceNode;
 import org.lo.d.eclipseplugin.mcp.model.StringSerializerCollection.Converter.ConversionException;
 
 public class MCPPropertyPage extends PropertyPage {
@@ -52,12 +53,13 @@ public class MCPPropertyPage extends PropertyPage {
 
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
-		WorkspaceNode workspaceNode = new WorkspaceNode(root);
+		WorkspaceSourceNode workspaceSourceNode = new WorkspaceSourceNode(root);
+		WorkspaceBinaryNode workspaceBinaryNode = new WorkspaceBinaryNode(root);
 		DirectoryItemRootNode directoryItemRootNode = new DirectoryItemRootNode(root);
 
 		IProject project = getProject();
 		try {
-			initModel(workspaceNode, directoryItemRootNode);
+			initModel(workspaceSourceNode, workspaceBinaryNode, directoryItemRootNode);
 		} catch (ConversionException e) {
 			throw new RuntimeException(e);
 		}
@@ -84,14 +86,15 @@ public class MCPPropertyPage extends PropertyPage {
 
 			{
 				CTabItem tabItemDependencySrcSettings = new CTabItem(tabFolder, SWT.NONE);
-				tabItemDependencySrcSettings.setText("依存ソース・ロケーション");
-				tabItemDependencySrcSettings.setControl(new SourceLocationTreeView(tabFolder, SWT.NONE, workspaceNode, propertyModel
+				tabItemDependencySrcSettings.setText("MD5生成ソース・ロケーション");
+				tabItemDependencySrcSettings.setControl(new SourceLocationTreeView(tabFolder, SWT.NONE, workspaceSourceNode, propertyModel
 						.getDependencySrcLocations()));
 			}
 			{
 				CTabItem tabItemTargetSrcSettings = new CTabItem(tabFolder, SWT.NONE);
-				tabItemTargetSrcSettings.setText("対象ソース・ロケーション");
-				tabItemTargetSrcSettings.setControl(new SourceLocationTreeView(tabFolder, SWT.NONE, workspaceNode, propertyModel.getTargetSrcLocations()));
+				tabItemTargetSrcSettings.setText("難読化対象クラス・ロケーション");
+				tabItemTargetSrcSettings
+						.setControl(new SourceLocationTreeView(tabFolder, SWT.NONE, workspaceBinaryNode, propertyModel.getTargetSrcLocations()));
 			}
 			{
 				CTabItem tabItemTargetSrcSettings = new CTabItem(tabFolder, SWT.NONE);
@@ -141,8 +144,9 @@ public class MCPPropertyPage extends PropertyPage {
 		}
 	}
 
-	private void initModel(WorkspaceNode workspaceNode, DirectoryItemRootNode directoryItemRootNode) throws ConversionException {
-		propertyModel = new MCPPropertyModel(Activator.PLUGIN_ID, workspaceNode, directoryItemRootNode, getProject());
+	private void initModel(WorkspaceSourceNode workspaceSourceNode, WorkspaceBinaryNode workspaceBinaryNode, DirectoryItemRootNode directoryItemRootNode)
+			throws ConversionException {
+		propertyModel = new MCPPropertyModel(Activator.PLUGIN_ID, workspaceSourceNode, workspaceBinaryNode, directoryItemRootNode, getProject());
 		propertyModel.setResource(getProject());
 		propertyModel.load();
 	}

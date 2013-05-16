@@ -114,10 +114,12 @@ public interface BuildCommand {
 			out.println(String.format("Cleaned %s. dirs:%d, files:%d.", path, fileCounts.dirs, fileCounts.files));
 		}
 
-		protected void copyFile(Path linkPath, Path entityPath) throws ExecutionException {
+		protected void copyFile(Path linkPath, Path entityPath, String ext) throws ExecutionException {
 			try {
 				if (!linkPath.toFile().exists()) {
-					Files.copy(entityPath, linkPath);
+					if (entityPath.toFile().isDirectory() || entityPath.toFile().getName().endsWith(ext)) {
+						Files.copy(entityPath, linkPath);
+					}
 					// out.println(String.format("Copied %s from %s .",
 					// linkPath, entityPath));
 				}
@@ -125,7 +127,7 @@ public interface BuildCommand {
 					for (File file : entityPath.toFile().listFiles()) {
 						Path ePath = Paths.get(file.toURI());
 						Path lPath = linkPath.resolve(ePath.getFileName());
-						copyFile(lPath, ePath);
+						copyFile(lPath, ePath, ext);
 					}
 				}
 			} catch (IOException e) {
@@ -220,6 +222,10 @@ public interface BuildCommand {
 			return oldFile;
 		}
 	}
+
+	public static final String MCP_DIR_BIN = "bin/minecraft";
+
+	public static final String MCP_DIR_SRC = "src/minecraft";
 
 	public int getCommandCount();
 

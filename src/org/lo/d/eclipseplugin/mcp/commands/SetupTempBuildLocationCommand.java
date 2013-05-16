@@ -39,13 +39,15 @@ public class SetupTempBuildLocationCommand extends AbstractBuildCommand {
 
 		final File root = property.getGenerateTempBuildLocation();
 		Path rootPath = Paths.get(root.toURI());
-		Path srcPath = rootPath.resolve("src/minecraft");
+		Path srcPath = rootPath.resolve(MCP_DIR_SRC);
+		Path binPath = rootPath.resolve(MCP_DIR_BIN);
 
 		subMonitor.subTask("Gen dirs.");
 		out.println("Gen dirs.");
 		out.nest();
 		createDirectory(rootPath);
 		createDirectory(srcPath);
+		createDirectory(binPath);
 		out.endNest();
 		subMonitor.worked(50);
 

@@ -1,7 +1,12 @@
 package org.lo.d.eclipseplugin.mcp.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -17,21 +22,49 @@ import org.lo.d.eclipseplugin.mcp.model.StringSerializerCollection.Converter;
 
 public class SourceLocationTree extends AbstractNodeTree {
 
+	public static class FragmentRootSourceNode extends SourceNode {
+		private FragmentRootSourceNode(ProjectNode parent, IPackageFragmentRoot fragmentRoot) {
+			super(parent, fragmentRoot.getResource().getLocation(), fragmentRoot.getElementName());
+		}
+	}
+
 	public static class ProjectNode extends AbstractSubTreeNode<SourceNode> {
 		private final WorkspaceNode parent;
 		private final IJavaProject project;
 
-		private ProjectNode(WorkspaceNode parent, IJavaProject project) {
+		private ProjectNode(WorkspaceNode parent, IJavaProject project, Type type) {
 			this.parent = parent;
 			this.project = project;
 			try {
-				for (IPackageFragmentRoot fragmentRoot : project.getPackageFragmentRoots()) {
-					if (fragmentRoot.getKind() != IPackageFragmentRoot.K_SOURCE) {
-						continue;
+				switch (type) {
+				case BINARY:
+					Set<IPath> outputLocations = new HashSet<IPath>();
+					outputLocations.add(project.getOutputLocation());
+					for (IClasspathEntry classpathEntry : project.getRawClasspath()) {
+						if (classpathEntry.getEntryKind() != IClasspathEntry.CPE_SOURCE) {
+							continue;
+						}
+						IPath outputLocation = classpathEntry.getOutputLocation();
+						if (outputLocation != null) {
+							outputLocations.add(outputLocation);
+						}
 					}
-					if (fragmentRoot.getResource() != null) {
-						childs.add(new SourceNode(this, fragmentRoot));
+					for (IPath path : outputLocations) {
+						childs.add(new SourceOutputNode(this, path, project.getProject()));
 					}
+					break;
+				case SOURCE:
+					for (IPackageFragmentRoot fragmentRoot : project.getAllPackageFragmentRoots()) {
+						if (fragmentRoot.getKind() != IPackageFragmentRoot.K_SOURCE) {
+							continue;
+						}
+						if (fragmentRoot.getResource() != null) {
+							childs.add(new FragmentRootSourceNode(this, fragmentRoot));
+						}
+					}
+					break;
+				default:
+					break;
 				}
 			} catch (JavaModelException e) {
 				e.printStackTrace();
@@ -59,20 +92,22 @@ public class SourceLocationTree extends AbstractNodeTree {
 		}
 	}
 
-	public static class SourceNode extends AbstractNode {
+	public abstract static class SourceNode extends AbstractNode {
 
-		private final ProjectNode parent;
-		private final IPackageFragmentRoot fragmentRoot;
+		protected final ProjectNode parent;
+		protected final IPath path;
+		protected final String name;
 
-		private SourceNode(ProjectNode parent, IPackageFragmentRoot fragmentRoot) {
+		protected SourceNode(ProjectNode parent, IPath path, String name) {
 			super();
 			this.parent = parent;
-			this.fragmentRoot = fragmentRoot;
+			this.path = path;
+			this.name = name;
 		}
 
 		@Override
 		public void buildLabel(StyledString styledString) {
-			styledString.append(fragmentRoot.getElementName());
+			styledString.append(name);
 			styledString.append(" : ", StyledString.DECORATIONS_STYLER);
 			styledString.append(getPath(), StyledString.DECORATIONS_STYLER);
 		}
@@ -88,12 +123,12 @@ public class SourceLocationTree extends AbstractNodeTree {
 		}
 
 		public String getPath() {
-			return fragmentRoot.getResource().getLocation().toString();
+			return path.toString();
 		}
 
 		@Override
 		public String getSerializeKey() {
-			return fragmentRoot.getElementName();
+			return name;
 		}
 	}
 
@@ -146,10 +181,27 @@ public class SourceLocationTree extends AbstractNodeTree {
 		}
 	}
 
+	public static class SourceOutputNode extends SourceNode {
+		protected SourceOutputNode(ProjectNode parent, IPath path, IProject project) {
+			super(parent, project.getFolder(path.removeFirstSegments(1)).getLocation(), path.toString());
+		}
+	}
+
+	public enum Type {
+		SOURCE, BINARY, ;
+	}
+
+	public static class WorkspaceBinaryNode extends WorkspaceNode {
+		public WorkspaceBinaryNode(IWorkspaceRoot workspace) {
+			super(workspace, Type.BINARY);
+		}
+
+	}
+
 	public static class WorkspaceNode extends AbstractSubTreeNode<ProjectNode> {
 		private final IWorkspaceRoot workspace;
 
-		public WorkspaceNode(IWorkspaceRoot workspace) {
+		public WorkspaceNode(IWorkspaceRoot workspace, Type type) {
 			this.workspace = workspace;
 			for (IProject project : workspace.getProjects()) {
 				if (!project.exists() || !project.isAccessible() || project.isPhantom() || project.isHidden()) {
@@ -159,7 +211,7 @@ public class SourceLocationTree extends AbstractNodeTree {
 				if (javaProject != null && javaProject.exists()) {
 					try {
 						javaProject.getPackageFragmentRoots();
-						childs.add(new ProjectNode(this, javaProject));
+						childs.add(new ProjectNode(this, javaProject, type));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -181,6 +233,13 @@ public class SourceLocationTree extends AbstractNodeTree {
 		protected ProjectNode[] createChildrenArray() {
 			return new ProjectNode[] {};
 		}
+	}
+
+	public static class WorkspaceSourceNode extends WorkspaceNode {
+		public WorkspaceSourceNode(IWorkspaceRoot workspace) {
+			super(workspace, Type.SOURCE);
+		}
+
 	}
 
 }
