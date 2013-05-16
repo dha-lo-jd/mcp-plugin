@@ -54,7 +54,7 @@ public class SourceLocationTree extends AbstractNodeTree {
 					}
 					break;
 				case SOURCE:
-					for (IPackageFragmentRoot fragmentRoot : project.getAllPackageFragmentRoots()) {
+					for (IPackageFragmentRoot fragmentRoot : project.getPackageFragmentRoots()) {
 						if (fragmentRoot.getKind() != IPackageFragmentRoot.K_SOURCE) {
 							continue;
 						}
