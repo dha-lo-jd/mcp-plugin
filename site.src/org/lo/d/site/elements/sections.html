@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>Unofficial MCP support plugin for Eclipse</title>
+<meta name="description"
+	content="Eclipseを使ったMCPによるMOD開発をサポートするプラグインの説明書" />
+<meta http-equiv="Content-Script-type" content="text/javascript" />
+<meta http-equiv="Content-Style-type" content="text/css" />
+<link rel="stylesheet" href="site/css/site.css" type="text/css"
+	media="all" />
+</head>
+<body>
+	<div th:fragment="index" th:remove="tag">
+		<a th:href="'#' + ${sect.name}" href="#hoge"><p
+				th:substituteby="${page.subPage(pageName,sect.name)} :: name">セクション名</p></a>
+	</div>
+	<div th:fragment="index_sections" th:remove="tag">
+		<p th:substituteby="${page.subPage(pageName,sect.name)} :: sections" />
+	</div>
+	<ul th:fragment="index_section">
+		<p th:substituteby="${page.subPage(pageName,sect.name)} :: section" />
+	</ul>
+	<div layout:fragment="index_section_layout" th:remove="tag">
+		<li><h5 layout:fragment="section_content">セクション見出し</h5></li>
+	</div>
+	<div th:fragment="content" th:remove="tag">
+		<h1>
+			<a th:id="${sect.name}"><p
+					th:substituteby="${page.subPage(pageName,sect.name)} :: name">セクション名</p></a>
+		</h1>
+		<div th:substituteby="${page.subPage(pageName,sect.name)} :: article">
+			Contents</div>
+	</div>
+</body>
+</html>

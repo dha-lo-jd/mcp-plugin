@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
    <feature url="features/org.lo.d.eclipse_plugin.mcp.feature_0.0.3.jar" id="org.lo.d.eclipse_plugin.mcp.feature" version="0.0.3"/>
+   <feature url="features/org.lo.d.eclipse_plugin.mcp.feature_0.0.4.jar" id="org.lo.d.eclipse_plugin.mcp.feature" version="0.0.4"/>
 </site>

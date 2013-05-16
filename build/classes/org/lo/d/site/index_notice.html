@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>Unofficial MCP support plugin for Eclipse</title>
+<meta name="description"
+	content="Eclipseを使ったMCPによるMOD開発をサポートするプラグインの説明書" />
+<meta http-equiv="Content-Script-type" content="text/javascript" />
+<meta http-equiv="Content-Style-type" content="text/css" />
+<link rel="stylesheet" href="site/css/site.css" type="text/css"
+	media="all" />
+</head>
+
+<body>
+	<div th:fragment="name" th:remove="tag">使用にあたって</div>
+	<div th:fragment="article">
+		<article>
+        Unofficial MCP support plugin for Eclipse は、以下の様な形式でMODのソースを管理していることを想定しています。<br />
+        <br />
+        ・Minecraft本体のソース・フォルダーと別に、ソース・フォルダーを作成してMODのソースを配置している<br />
+        ・Minecraft本体のソース・フォルダーと別に、ソースのリンクとしてMODのソースを配置している<br />
+        ・Minecraft本体のプロジェクトと別に、MODのプロジェクトを配置して、そのプロジェクトからMinecraft本体のプロジェクトを参照している<br />
+        <br />
+		</article>
+	</div>
+</body>
+</html>

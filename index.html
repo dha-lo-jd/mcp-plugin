@@ -1,11 +1,199 @@
-<html>
-<head></head>
-<body>
-�������������<br />
-<br />
-�ȉ���URL��Eclipse�̐V�K�\�t�g�E�F�A�X�V�T�C�g�Ƃ��Ēǉ����Ă�<br />
-http://dha-lo-jd.github.io/mcp-plugin/<br />
-<br />
-��������<br />
-</body>
-</html>
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta charset="utf-8" />
+<title>Unofficial MCP support plugin for Eclipse</title>
+<meta content="Eclipseを使ったMCPによるMOD開発をサポートするプラグインの説明書" name="description" />
+<meta content="text/javascript" http-equiv="Content-Script-type" />
+<meta content="text/css" http-equiv="Content-Style-type" />
+<link href="site/css/site.css" media="all" rel="stylesheet" type="text/css" />
+<link href="site/index.css" media="all" rel="stylesheet" type="text/css" />
+</head><body>
+	<header>
+        <h1>Unofficial MCP support plugin for Eclipse</h1>
+        <h4>
+            <aside>by ┃━┏┃(かを)</aside>
+        </h4>
+    </header>
+	<hr />
+	
+        
+            <section>
+                
+		<h1>
+			<a id="index">目次</a>
+		</h1>
+		<hgroup>
+		
+			<h3>
+				
+		<a href="#outline">概要</a>
+	
+			</h3>
+			
+		
+		
+			<h3>
+				
+		<a href="#license">利用規約・免責事項</a>
+	
+			</h3>
+			
+		<ul>
+		
+		<li>
+			
+				<a href="site/license/">ライセンス</a>
+			
+		</li>
+	</ul>
+		
+			<h3>
+				
+		<a href="#install">インストール</a>
+	
+			</h3>
+			
+		
+		
+			<h3>
+				
+		<a href="#get_start">使い方</a>
+	
+			</h3>
+			
+		
+		
+		</hgroup>
+	
+            </section>
+            <hr />
+        
+            <section>
+                
+		<h1>
+			<a id="outline">概要</a>
+		</h1>
+		<div>
+		<article>
+			<h2>Unofficial MCP support plugin for Eclipse について</h2>
+			このプラグインは、MCPを使用したMOD開発をサポートするためのEclipseプラグインです。<br />
+			プロジェクトの設定に基づき、難読化や、MODのファイルをまとめてZip圧縮する、と言った作業を1クリックで行うことができます。<br />
+		</article>
+	</div>
+	
+            </section>
+            <hr />
+        
+            <section>
+                
+		<h1>
+			<a id="license">利用規約・免責事項</a>
+		</h1>
+		<div>
+		<article>
+			Unofficial MCP support plugin for Eclipse は、BSDライセンスによってライセンスされています。<br />
+			本プラグインの使用や、コードの改変、再配布にあたっては<a href="site/license/">こちら</a>をご確認下さい。<br />
+		</article>
+	</div>
+	
+            </section>
+            <hr />
+        
+            <section>
+                
+		<h1>
+			<a id="install">インストール</a>
+		</h1>
+		<div>
+		<article>
+			一般的なEclipseプラグイン導入の手順でインストール出来ます。<br /> 更新サイトから追加する場合<br />
+			http://dha-lo-jd.github.io/mcp-plugin/<br /> <br /> 直接ダウンロードする場合<br />
+			https://github.com/dha-lo-jd/mcp-plugin/tree/gh-pages/plugins<br />
+		</article>
+	</div>
+	
+            </section>
+            <hr />
+        
+            <section>
+                
+		<h1>
+			<a id="get_start">使い方</a>
+		</h1>
+		<div>
+		<article>
+			<pre>
+以下の説明では、各項目や操作をPleiades All in One Eclipse 4.2環境における名称で記述しています。
+それ以外の環境でも使用出来ます(たぶん)が、英語だったり名称が違う可能性がありますので、頑張って読み替えて下さい。
+
+１，プロジェクトの分割
+プロジェクトを分割しなくても、ソースフォルダーを複数作成したり、ソースのリンクによって「Minecraftのソース」「前提MODのソース」「自MODのソース」
+と分かれていれば、問題なく設定することができますが、後から構成の変更がしやすい、プロジェクト自体を分割する方法で説明していきます。
+
+１．１，前準備
+これからMODを作成する人は３に進んで下さい。
+分割したいMODの前提MODがある場合は、まずそちらの分割作業から始めます。
+
+２，ソースの準備
+既に本体と自作MODのソースが混在している場合は、頑張って自作MODのソースを分けて下さい。
+既存書き換えをしている場合、差分元として書き換え前のソースをMinecraftのソースフォルダーに置く必要があります。
+
+３，プロジェクトの作成
+任意の名前でJavaプロジェクトを新規に作成します。
+特に設定を弄る必要はありません。
+
+４，ソースの配置
+作成したプロジェクトのソースフォルダーに自作MODのソースを配置します。
+パッケージ構成も含めて、同じ構造にします。
+
+５，ビルドパスの設定
+５．１，本体プロジェクトの設定
+Minecraft本体プロジェクトのプロパティーを開き、「Javaのビルドパス」を選びます。
+「順序及びエクスポート」タブを選び、「全て選択」ボタンで項目すべてにチェックをつけて「OK」で画面を閉じます。
+
+５．２，自作MODプロジェクトの設定
+自作MODプロジェクトのプロパティーを開き、「Javaのビルドパス」を選びます。
+「プロジェクトタブ」を選び、「追加」ボタンで、Minecraft本体プロジェクトを追加します。
+
+(オプション)：自作MODプロジェクトが必要とする前提MODプロジェクトがあれば、それらも追加します。
+
+「ライブラリー」タブを選び、JREや他の項目をすべて「除去」して、「OK」で画面を閉じます。
+
+
+CHECK：
+この時点で、正しく設定できていればビルドエラーは起こりません。
+
+
+６，MCPプラグインの設定
+自作MODプロジェクトのプロパティーを開き、「MCPビルド」を選びます。
+
+６．１，「MCPロケーション」タブの設定
+「MCPロケーション」タブを選びます。
+
+６．１．１，MCPロケーションの設定
+設定をいじっていなければデフォルトの「MCP_LOC」でMCPディレクトリのファイルパスが表示されますが、
+構成が異なる場合は「フォルダを参照」ボタンや直接入力でMCPディレクトリのファイルパスを指定して下さい。
+
+６．１．２，ビルド用仮想MCPロケーションの設定
+Unofficial MCP support plugin for Eclipse では、MCPの各種操作にあたって、
+MCPのコマンド一式やランタイムをコピーした作業用ディレクトリを作成します。(srcフォルダーを削除したりするためです)
+デフォルトのままで問題ありませんが、必要な場合は任意のファイルパスに変更して下さい。
+
+６．１．３，出力Zipファイル名の設定
+Zip圧縮操作を行った際に出力されるファイル名を指定します。
+デフォルトではmod_(プロジェクト名).zipとなります。
+ファイルはプロジェクト・ディレクトリーの直下に生成され、同名ファイルがあった場合は(ファイル名)_(連番).zipにリネームします。
+
+
+			</pre>
+		</article>
+	</div>
+	
+            </section>
+            <hr />
+        
+    
+	<footer>
+        <address>Copyright © 2013 dha_lo_jd All rights reserved.</address>
+    </footer>
+</body></html>

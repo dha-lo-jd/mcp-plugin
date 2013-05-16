@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>Unofficial MCP support plugin for Eclipse</title>
+<meta name="description"
+	content="Eclipseを使ったMCPによるMOD開発をサポートするプラグインの説明書" />
+<meta http-equiv="Content-Script-type" content="text/javascript" />
+<meta http-equiv="Content-Style-type" content="text/css" />
+<link rel="stylesheet" href="site/css/site.css" type="text/css"
+	media="all" />
+</head>
+<body>
+	<div th:fragment="name" th:remove="tag">設定</div>
+	<div th:fragment="article">
+		<article>
+			Unofficial MCP support plugin for Eclipse の各種設定は、<br />
+			MCPのコマンドを実行したいプロジェクト<br />
+			(プロジェクトを分割していない場合はMinecraft本体のプロジェクト、分割している場合は分割した各MODのプロジェクトになります)<br />
+			の設定画面から行います。<br />
+			<br />
+			プラグインを導入した状態でプロジェクトの設定画面を開くと、「MCPビルド」の項目が追加されます。<br />
+
+		</article>
+	</div>
+</body>
+</html>

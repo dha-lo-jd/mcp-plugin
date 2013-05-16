@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+    xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>Unofficial MCP support plugin for Eclipse</title>
+<meta name="description"
+	content="Eclipseを使ったMCPによるMOD開発をサポートするプラグインの説明書" />
+<meta http-equiv="Content-Script-type" content="text/javascript" />
+<meta http-equiv="Content-Style-type" content="text/css" />
+<link rel="stylesheet" href="site/css/site.css" type="text/css"
+	media="all" />
+</head>
+
+<body>
+	<div th:fragment="name" th:remove="tag">目次</div>
+	<hgroup th:fragment="article" th:remove="all-but-first">
+		<div th:each="sect : ${page.sections}" th:remove="tag"
+			th:if="${sect.name != 'index'}">
+			<h3>
+				<div
+					th:substituteby="(${page.findResourceAsString('elements/sections')}) :: index">
+					<a href="#outline">概要</a>
+				</div>
+			</h3>
+			<div
+				th:substituteby="(${page.findResourceAsString('elements/sections')}) :: index_sections"></div>
+		</div>
+		<h4>Unofficial MCP support plugin for Eclipse について</h4>
+		<h3>
+			<a href="#license">利用規約・免責事項</a>
+		</h3>
+		<h3>
+			<a href="#notice">使用にあたって</a>
+		</h3>
+		<h3>
+			<a href="#install">インストール</a>
+		</h3>
+		<h3>
+			<a href="#settings">設定</a>
+		</h3>
+		<h3>
+			<a href="#commands">コマンド</a>
+		</h3>
+	</hgroup>
+</body>
+</html>

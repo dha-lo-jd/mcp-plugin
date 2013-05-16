@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" lang="ja">
+<head th:fragment="substituteby">
+<meta charset="utf-8" />
+<title>Unofficial MCP support plugin for Eclipse</title>
+<meta name="description"
+	content="Eclipseを使ったMCPによるMOD開発をサポートするプラグインの説明書" />
+<meta http-equiv="Content-Script-type" content="text/javascript" />
+<meta http-equiv="Content-Style-type" content="text/css" />
+<link rel="stylesheet" href="site/css/site.css" type="text/css"
+	media="all" />
+<link rel="stylesheet" href="page.css" type="text/css" media="all"
+	th:href="${page.copyToResource(pageName,'css')}"
+	th:if="${page.findResourceAsString(pageName,'css')}" />
+</head>
+<body>
+HEAD
+</body>
+</html>

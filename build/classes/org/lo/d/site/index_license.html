@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>Unofficial MCP support plugin for Eclipse</title>
+<meta name="description"
+	content="Eclipseを使ったMCPによるMOD開発をサポートするプラグインの説明書" />
+<meta http-equiv="Content-Script-type" content="text/javascript" />
+<meta http-equiv="Content-Style-type" content="text/css" />
+<link rel="stylesheet" href="site/css/site.css" type="text/css"
+	media="all" />
+</head>
+<body>
+	<div th:fragment="name" th:remove="tag">利用規約・免責事項</div>
+	<p th:fragment="sections"
+		th:substituteby="(${page.findResourceAsString('elements/sections')}) :: index_section" />
+	<div th:fragment="section"
+		layout:include="(${page.findResourceAsString('elements/sections')}) :: index_section_layout"
+		th:remove="tag">
+		<div layout:fragment="section_content" th:remove="tag">
+			<div th:fragment="about" th:remove="tag">
+				<a href="site/license/">ライセンス</a>
+			</div>
+		</div>
+	</div>
+	<div th:fragment="article">
+		<article>
+			Unofficial MCP support plugin for Eclipse は、BSDライセンスによってライセンスされています。<br />
+			本プラグインの使用や、コードの改変、再配布にあたっては<a href="site/license/">こちら</a>をご確認下さい。<br />
+		</article>
+	</div>
+</body>
+</html>
