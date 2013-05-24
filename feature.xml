@@ -2,7 +2,7 @@
 <feature
       id="org.lo.d.eclipse_plugin.mcp.feature"
       label="MCP Unofficial Plugin"
-      version="0.0.6">
+      version="0.0.7">
 
    <description url="http://www.example.com/description">
       このプラグインは、MCPを使用したMOD開発をサポートするためのEclipseプラグインです。
