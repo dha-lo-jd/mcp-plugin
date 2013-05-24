@@ -3,4 +3,5 @@
    <feature url="features/org.lo.d.eclipse_plugin.mcp.feature_0.0.4.jar" id="org.lo.d.eclipse_plugin.mcp.feature" version="0.0.4"/>
    <feature url="features/org.lo.d.eclipse_plugin.mcp.feature_0.0.5.jar" id="org.lo.d.eclipse_plugin.mcp.feature" version="0.0.5"/>
    <feature url="features/org.lo.d.eclipse_plugin.mcp.feature_0.0.6.jar" id="org.lo.d.eclipse_plugin.mcp.feature" version="0.0.6"/>
+   <feature url="features/org.lo.d.eclipse_plugin.mcp.feature_0.0.7.jar" id="org.lo.d.eclipse_plugin.mcp.feature" version="0.0.7"/>
 </site>
