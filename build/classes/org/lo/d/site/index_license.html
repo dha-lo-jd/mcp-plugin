@@ -24,11 +24,18 @@
 			</div>
 		</div>
 	</div>
-	<div th:fragment="article">
-		<article>
-			Unofficial MCP support plugin for Eclipse は、BSDライセンスによってライセンスされています。<br />
-			本プラグインの使用や、コードの改変、再配布にあたっては<a href="site/license/">こちら</a>をご確認下さい。<br />
-		</article>
+	<div layout:fragment="article" th:remove="tag">
+		<div
+			layout:include="(${page.findResourceAsString('elements/sections')}) :: content"
+			th:with="theme='e',contentTheme='e'">
+			<div layout:fragment="content" th:remove="tag">
+				<article>
+					Unofficial MCP support plugin for Eclipse
+					は、BSDライセンスによってライセンスされています。<br /> 本プラグインの使用や、コードの改変、再配布にあたっては<a
+						href="site/license/">こちら</a>をご確認下さい。<br />
+				</article>
+			</div>
+		</div>
 	</div>
 </body>
 </html>

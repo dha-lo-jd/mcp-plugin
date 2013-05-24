@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>Unofficial MCP support plugin for Eclipse</title>
+<meta name="description"
+	content="Eclipseを使ったMCPによるMOD開発をサポートするプラグインの説明書" />
+<meta http-equiv="Content-Script-type" content="text/javascript" />
+<meta http-equiv="Content-Style-type" content="text/css" />
+<link rel="stylesheet" href="site/css/site.css" type="text/css"
+	media="all" />
+</head>
+<body>
+	<div th:fragment="name" th:remove="tag">更新履歴</div>
+	<div layout:fragment="article" th:remove="tag">
+		<div
+			layout:include="(${page.findResourceAsString('elements/sections')}) :: content"
+			th:with="theme='c',contentTheme='c'">
+			<div layout:fragment="content" th:remove="tag">
+				<article data-role="collapsible" data-theme="c"
+					data-content-theme="d" data-collapsed="false"
+					th:object="${page.updates.first}" th:if="${page.updates.first}">
+					<h3 th:text="*{version}">v0.0.6</h3>
+					<div
+						th:substituteby="(${page.updates.path} + '/' + *{fileName}) :: update">
+						更新内容</div>
+				</article>
+				<article data-role="collapsible" data-theme="c"
+					data-content-theme="d">
+					<h3>過去の更新履歴</h3>
+					<div th:each="update : ${page.updates.updates}" th:remove="tag">
+						<div th:unless="${page.updates.isFirst(update)}" th:remove="tag">
+							<article data-role="collapsible" data-theme="c"
+								data-content-theme="d">
+								<h3>
+									<div th:text="${update.version}" th:remove="tag">バージョン番号</div>
+								</h3>
+								<div
+									th:substituteby="(${page.updates.path} + '/' + ${update.fileName}) :: update">
+									更新内容</div>
+							</article>
+						</div>
+					</div>
+				</article>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

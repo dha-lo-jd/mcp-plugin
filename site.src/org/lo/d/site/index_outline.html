@@ -13,12 +13,18 @@
 </head>
 <body>
 	<div th:fragment="name" th:remove="tag">概要</div>
-	<div th:fragment="article">
-		<article>
-			<h2>Unofficial MCP support plugin for Eclipse について</h2>
-			このプラグインは、MCPを使用したMOD開発をサポートするためのEclipseプラグインです。<br />
-			プロジェクトの設定に基づき、難読化や、MODのファイルをまとめてZip圧縮する、と言った作業を1クリックで行うことができます。<br />
-		</article>
+	<div layout:fragment="article" th:remove="tag">
+		<div
+			layout:include="(${page.findResourceAsString('elements/sections')}) :: content"
+			th:with="theme='b',contentTheme='d'">
+			<div layout:fragment="content" th:remove="tag">
+				<article>
+					<h2>Unofficial MCP support plugin for Eclipse について</h2>
+					このプラグインは、MCPを使用したMOD開発をサポートするためのEclipseプラグインです。<br />
+					プロジェクトの設定に基づき、難読化や、MODのファイルをまとめてZip圧縮する、と言った作業を1クリックで行うことができます。<br />
+				</article>
+			</div>
+		</div>
 	</div>
 </body>
 </html>

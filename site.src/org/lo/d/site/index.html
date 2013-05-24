@@ -1,26 +1,23 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" lang="ja"
-    layout:decorator="(${page.findResourceAsString('layout/body')})">
+	layout:decorator="(${page.findResourceAsString('layout/body')})">
 <head>
-<meta th:fragment="head-charset" charset="utf-8"/>
+<meta th:fragment="head-charset" charset="utf-8" />
 <meta http-equiv="Content-Script-type" content="text/javascript"
 	th:remove="all" />
 <meta http-equiv="Content-Style-type" content="text/css" th:remove="all" />
 <link rel="stylesheet" href="site/css/site.css" type="text/css"
 	media="all" th:remove="all" />
 </head>
-
 <body>
-    <div layout:fragment="body-content">
-        <div th:each="sect : ${page.sections}" th:remove="tag">
-            <section>
-                <div
-                    th:substituteby="(${page.findResourceAsString('elements/sections')}) :: content">
-                    セクション</div>
-            </section>
-            <hr />
-        </div>
-    </div>
+	<div layout:fragment="body-content">
+		<div th:each="sect : ${page.sections}" th:remove="tag">
+			<section>
+				<p layout:include="${page.subPage(pageName,sect.name)} :: article"
+					th:remove="tag" />
+			</section>
+		</div>
+	</div>
 </body>
 </html>

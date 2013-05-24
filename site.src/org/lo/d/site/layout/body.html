@@ -2,25 +2,29 @@
 <html xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout" lang="ja"
 	layout:decorator="(${page.findResourceAsString('layout/html')})">
-<head layout:include="(${page.findResourceAsString('layout/html')}) :: head">
+<head
+	layout:include="(${page.findResourceAsString('layout/html')}) :: head">
 <meta charset="utf-8" />
 <meta http-equiv="Content-Script-type" content="text/javascript" />
 <meta http-equiv="Content-Style-type" content="text/css" />
 <link rel="stylesheet" href="site/css/site.css" type="text/css"
-    media="all" />
-<link layout:fragment="head-css1" rel="stylesheet" href="site/css/a1.css" type="text/css" media="all" />
+	media="all" />
+<link layout:fragment="head-css1" rel="stylesheet"
+	href="site/css/a1.css" type="text/css" media="all" />
 <script layout:fragment="head-script" type="text/javascript">
-test</script>
+	test
+</script>
 </head>
-
 <body layout:fragment="body">
-	<header
-		th:substituteby="(${page.findResourceAsString('include/header')}) :: substituteby">
-	</header>
-	<hr />
-	<div layout:fragment="body-content" th:remove="tag"></div>
-	<footer
-		th:substituteby="(${page.findResourceAsString('include/footer')}) :: substituteby">
-	</footer>
+	<div data-role="page">
+		<a id="page-top"></a>
+		<header
+			th:substituteby="(${page.findResourceAsString('include/header')}) :: substituteby">
+		</header>
+		<div layout:fragment="body-content" th:remove="tag"></div>
+		<footer
+			th:substituteby="(${page.findResourceAsString('include/footer')}) :: substituteby">
+		</footer>
+	</div>
 </body>
 </html>

@@ -25,13 +25,18 @@
 	<div layout:fragment="index_section_layout" th:remove="tag">
 		<li><h5 layout:fragment="section_content">セクション見出し</h5></li>
 	</div>
-	<div th:fragment="content" th:remove="tag">
-		<h1>
-			<a th:id="${sect.name}"><p
-					th:substituteby="${page.subPage(pageName,sect.name)} :: name">セクション名</p></a>
-		</h1>
-		<div th:substituteby="${page.subPage(pageName,sect.name)} :: article">
-			Contents</div>
+	<div layout:fragment="content">
+		<div data-role="collapsible" data-collapsed="false"
+			th:attr="data-theme=${theme}, data-content-theme=${contentTheme}">
+			<h1>
+				<a th:id="${sect.name}"></a>
+				<p th:substituteby="${page.subPage(pageName,sect.name)} :: name">セクション名</p>
+			</h1>
+			<div layout:fragment="content"></div>
+			<div th:substituteby="${page.subPage(pageName,sect.name)} :: article">
+				Contents</div>
+			<a href="#index" th:if="${sect.name != 'index'}" class="to_index">▲目次</a>
+		</div>
 	</div>
 </body>
 </html>
