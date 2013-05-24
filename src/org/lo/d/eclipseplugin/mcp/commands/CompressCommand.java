@@ -14,6 +14,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.lo.d.eclipseplugin.mcp.commands.BuildCommand.AbstractBuildCommand;
 import org.lo.d.eclipseplugin.mcp.handlers.MCPBuildProperty;
@@ -37,6 +39,7 @@ public class CompressCommand extends AbstractBuildCommand {
 	private void compress(Path reobfPath) {
 		File reobfDir = reobfPath.resolve("minecraft").toFile();
 		ZipOutputStream zipOutputStream = null;
+
 		try {
 			if (!reobfDir.exists() || !reobfDir.isDirectory()) {
 				return;
@@ -82,18 +85,23 @@ public class CompressCommand extends AbstractBuildCommand {
 		} finally {
 			quietClose(zipOutputStream);
 		}
+		try {
+			property.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);
+		} catch (CoreException e) {
+			e.printStackTrace(console.newPrintStream());
+		}
 	}
 
 	private void entryToZip(ZipOutputStream zipOutputStream, File file, Path dirPath) throws IOException {
 		Path entryPath = dirPath.resolve(file.getName());
 		if (file.isDirectory()) {
-			ZipEntry paramZipEntry = new ZipEntry(entryPath.toString() + "/");
+			ZipEntry paramZipEntry = new ZipEntry(entryPath.toString().replaceAll("\\\\", "/") + "/");
 			zipOutputStream.putNextEntry(paramZipEntry);
 			for (File f : file.listFiles()) {
 				entryToZip(zipOutputStream, f, entryPath);
 			}
 		} else {
-			ZipEntry paramZipEntry = new ZipEntry(entryPath.toString());
+			ZipEntry paramZipEntry = new ZipEntry(entryPath.toString().replaceAll("\\\\", "/"));
 			zipOutputStream.putNextEntry(paramZipEntry);
 			BufferedInputStream is = null;
 			try {

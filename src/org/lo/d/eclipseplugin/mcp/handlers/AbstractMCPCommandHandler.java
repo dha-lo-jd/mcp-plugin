@@ -7,11 +7,9 @@ import mcp_plugin.Activator;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -131,11 +129,6 @@ public abstract class AbstractMCPCommandHandler extends AbtractMCPBuildPropertyH
 
 					out.println("End MCP build process.");
 				} catch (ExecutionException e) {
-					e.printStackTrace(console.newPrintStream());
-				}
-				try {
-					project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-				} catch (CoreException e) {
 					e.printStackTrace(console.newPrintStream());
 				}
 

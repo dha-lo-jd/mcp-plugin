@@ -72,12 +72,15 @@ public interface BuildCommand {
 
 		protected final NestedMessageConsoleStream out;
 
+		protected final NestMessageConsole console;
+
 		protected final String name;
 
 		protected IProgressMonitor monitor;
 
 		protected AbstractBuildCommand(MCPBuildProperty property, NestMessageConsole console, String name) {
 			this.property = property;
+			this.console = console;
 			out = console.newMessageStream();
 			this.name = name;
 		}
